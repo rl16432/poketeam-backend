@@ -5,7 +5,6 @@ using System.Text.Json;
 using NSubstitute;
 using System.Net;
 using System.Text;
-using Moq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -64,9 +63,12 @@ namespace msa_phase_2_backend.testing
             userContext.SaveChanges();
 
             // Set up mock logger
-            var mockLogger = new Mock<ILogger<UserController>>();
+            var mockLogger = LoggerFactory.Create(config =>
+            {
+                config.AddConsole();
+            }).CreateLogger<UserController>();
 
-            controller = new UserController(userContext, mockLogger.Object, httpClientFactoryMock);
+            controller = new UserController(userContext, mockLogger, httpClientFactoryMock);
         }
 
         [Test]
@@ -90,14 +92,17 @@ namespace msa_phase_2_backend.testing
         public async Task GetAllUsers_ReturnsAllUsers()
         {
             var result = await controller.GetUsers();
+            var typedResult = result.Result as OkObjectResult;
+
             // The initial database should have 3 users
-            Assert.That((result.Value as ICollection<User>)!, Has.Count.EqualTo(3));
+            Assert.That((typedResult!.Value as ICollection<User>)!, Has.Count.EqualTo(3));
         }
 
         [Test]
         public async Task CreateUser_ReturnsCreatedAtActionResult()
         {
             var result = await controller.PostUser(new UserCreateDTO { UserName = "Volkner" });
+            
             Assert.That(result.Result, Is.InstanceOf<CreatedAtActionResult>());
         }
 
@@ -139,6 +144,23 @@ namespace msa_phase_2_backend.testing
             Assert.That(updatedUser!.Pokemon, Has.Count.EqualTo(1));
             Assert.That(updatedUser!.Pokemon.First().Name, Is.EqualTo("litten"));
         }
-        
+
+        [Test]
+        public async Task AddPokemonToUser_DoesNotAddDuplicate()
+        {
+            int userId = 2;
+
+            await controller.AddPokemonToUser(userId, "litten");
+
+            // Attempt to add second litten
+            var result = await controller.AddPokemonToUser(userId, "litten");
+
+            // Get user after Pokemon is added
+            var updatedUser = await userContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+
+            // Count of Pokemon under user should be 1
+            Assert.That(updatedUser!.Pokemon, Has.Count.EqualTo(1));
+            Assert.That(updatedUser!.Pokemon.First().Name, Is.EqualTo("litten"));
+        }
     }
 }

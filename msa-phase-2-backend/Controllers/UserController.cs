@@ -35,7 +35,7 @@ public class UserController : ControllerBase
     public async Task<ActionResult<IEnumerable<User>>> GetUsers()
     {
         var users = await _context.Users.Include("Pokemon").ToListAsync();
-        return users;
+        return Ok(users);
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes a user and all of it's Pokemon if it exists
+    /// Deletes a user and all of its Pokemon if it exists
     /// </summary>
     /// <param name="userId">The userId of the user to delete</param>
     /// <returns>A 200 OK response</returns>
