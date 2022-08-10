@@ -1,7 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using msa_phase_2_backend.Models;
 
-namespace msa_phase_2_backend.Models
+namespace msa_phase_2_backend.Data
 {
+    // Add dummy users to the database
+    // https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/working-with-sql?view=aspnetcore-6.0&tabs=visual-studio
     public static class SeedData
     {
         // Used to add users in the database on initialisation
@@ -14,7 +17,7 @@ namespace msa_phase_2_backend.Models
                 // Look for any users
                 if (context.Users.Any())
                 {
-                    return;   // DB has been seeded
+                    return; // DB has been seeded
                 }
 
                 context.Users.AddRange(

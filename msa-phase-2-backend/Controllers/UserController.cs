@@ -60,7 +60,7 @@ public class UserController : ControllerBase
     /// Creates a new user
     /// </summary>
     /// <param name="userCreateDto">The name of the user to create</param>
-    /// <returns>A success code if the user has been created</returns>
+    /// <returns>A 201 success code if the user has been created, along with the new user</returns>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<ActionResult<User>> PostUser(UserCreateDTO userCreateDto)
@@ -106,6 +106,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<ActionResult<User>> AddPokemonToUser(int userId, [Required] string pokemon)
     {
+        // Find user by ID
         var user = await _context.Users.Include("Pokemon").FirstOrDefaultAsync(u => u.UserId == userId);
 
         if (user == null)
@@ -113,6 +114,7 @@ public class UserController : ControllerBase
             return NotFound("User does not exist");
         }
 
+        // Call on PokeApi
         var res = await _client.GetAsync($"/api/v2/pokemon/{pokemon.ToLower()}");
 
         if (!res.IsSuccessStatusCode)
@@ -121,7 +123,7 @@ public class UserController : ControllerBase
         }
 
         var content = await res.Content.ReadAsStringAsync();
-
+        // Convert JSON response to PokeApi schema object
         var jsonContent = JsonSerializer.Deserialize<PokeApi>(content);
 
         // Initialise list if not existant in user
@@ -145,33 +147,13 @@ public class UserController : ControllerBase
 
         // Check if Pokemon already added to user
         if (user.Pokemon.Any(p => p.PokemonNo == newPokemon.PokemonNo))
-        { 
+        {
             return BadRequest("Pokemon has already been added");
         }
+
+        // Add Pokemon to database first
         _context.Pokemon.Add(newPokemon);
-
-        // Check if Pokemon already added in database
-        //if (_context.Pokemon.Any(p => p.PokemonId == newPokemon.PokemonId) == false)
-        //{
-        //    _context.Pokemon.Add(newPokemon);
-        //}
-
-        //user.Pokemon.Add(new Pokemon
-        //{
-        //    PokemonId = jsonContent!.PokemonId,
-        //    Name = jsonContent!.Name,
-        //    Stats = jsonContent!.Stats!.Select(s => new Stats
-        //    {
-        //        BaseStat = s.BaseStat,
-        //        Effort = s.Effort,
-        //        Stat = new Stat
-        //        {
-        //            Name = s.Stat!.Name,
-        //            Url = s.Stat!.Url
-        //        }
-        //    })
-        //});
-
+        // Link new Pokemon to user
         user.Pokemon.Add(newPokemon);
 
         await _context.SaveChangesAsync();

@@ -7,12 +7,13 @@ namespace msa_phase_2_backend.Models
     public class Pokemon
     {
         [Key]
+        [Required]
         public int PokemonId { get; set; }
         [Required]
         public int PokemonNo { get; set; }
         [Required]
         public string? Name { get; set; }
-        [Required]
+        
         public int Hp { get; set; }
         public int Attack { get; set; }
         public int Defense { get; set; }

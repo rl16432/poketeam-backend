@@ -1,5 +1,6 @@
 using System.Reflection;
 using msa_phase_2_backend.Models;
+using msa_phase_2_backend.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

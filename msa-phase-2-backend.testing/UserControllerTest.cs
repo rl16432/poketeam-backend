@@ -46,6 +46,7 @@ namespace msa_phase_2_backend.testing
             httpClientFactoryMock.CreateClient("pokeapi").Returns(fakeHttpClient);
         }
 
+        // Set up after every test
         [SetUp]
         public void Setup()
         {
@@ -66,17 +67,6 @@ namespace msa_phase_2_backend.testing
             var mockLogger = new Mock<ILogger<UserController>>();
 
             controller = new UserController(userContext, mockLogger.Object, httpClientFactoryMock);
-
-            //// Set up mock context
-            //var userMockSet = new Mock<DbSet<User>>();
-            //var pokemonMockSet = new Mock<DbSet<Pokemon>>();
-
-            //var mockContext = new Mock<UserContext>();
-
-            //// Users attribute returns DbSet<User>
-            //mockContext.Setup(m => m.Users).Returns(userMockSet.Object);
-            //mockContext.Setup(m => m.Pokemon).Returns(pokemonMockSet.Object);
-            //userMockSet.Setup(d => d.Include("Pokemon")).Returns(userMockSet.Object);
         }
 
         [Test]
@@ -84,11 +74,11 @@ namespace msa_phase_2_backend.testing
         {
             int userId = 1;
             var result = await controller.GetUser(userId);
-            //Console.WriteLine(JsonSerializer.Serialize((result.Result as OkObjectResult)!.Value));
             Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
 
         }
 
+        // Test that OkObjectResult is returned by UserController.GetUsers()
         [Test]
         public async Task GetAllUsers_ReturnsOkObjectResult()
         {
@@ -100,7 +90,7 @@ namespace msa_phase_2_backend.testing
         public async Task GetAllUsers_ReturnsAllUsers()
         {
             var result = await controller.GetUsers();
-            //Console.WriteLine(JsonSerializer.Serialize(result.Value));
+            // The initial database should have 3 users
             Assert.That((result.Value as ICollection<User>)!, Has.Count.EqualTo(3));
         }
 
@@ -119,7 +109,6 @@ namespace msa_phase_2_backend.testing
             var typedResult = result.Result as CreatedAtActionResult;
             var value = typedResult!.Value as User;
 
-            //Console.WriteLine(JsonSerializer.Serialize(value));
             // UserName is correct
             Assert.That(value!.UserName, Is.EqualTo("Cheren"));
             // Pokemon List is initialised as empty
