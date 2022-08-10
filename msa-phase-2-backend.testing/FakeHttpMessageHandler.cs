@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace msa_phase_2_backend.testing
 {
+    // Used for mocking HTTPClient
+    // https://anthonygiretti.com/2018/09/06/how-to-unit-test-a-class-that-consumes-an-httpclient-with-ihttpclientfactory-in-asp-net-core/
     public class FakeHttpMessageHandler : DelegatingHandler
     {
         private HttpResponseMessage _fakeResponse;

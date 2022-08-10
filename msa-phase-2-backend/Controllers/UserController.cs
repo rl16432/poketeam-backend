@@ -53,7 +53,7 @@ public class UserController : ControllerBase
             return NotFound();
         }
 
-        return user;
+        return Ok(user);
     }
 
     /// <summary>

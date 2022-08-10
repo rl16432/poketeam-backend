@@ -19,7 +19,7 @@ if (builder.Environment.IsDevelopment())
 {
     // Use in memory database if in development
     builder.Services.AddDbContext<UserContext>(opt =>
-        opt.UseInMemoryDatabase("Users")
+        opt.UseInMemoryDatabase("PokeTeam")
     );
 }
 else
