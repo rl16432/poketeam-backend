@@ -5,7 +5,7 @@ using msa_phase_2_backend.Models.DTO;
 using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
 
-namespace MessageAPI.Controllers;
+namespace msa_phase_2_backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -60,7 +60,7 @@ public class UserController : ControllerBase
     /// Creates a new user
     /// </summary>
     /// <param name="userCreateDto">The name of the user to create</param>
-    /// <returns>a success code if the user has been created</returns>
+    /// <returns>A success code if the user has been created</returns>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<ActionResult<User>> PostUser(UserCreateDTO userCreateDto)
@@ -68,13 +68,12 @@ public class UserController : ControllerBase
         var user = new User { UserName = userCreateDto.UserName, Pokemon = new List<Pokemon>() };
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
-        Console.WriteLine(userCreateDto);
 
         return CreatedAtAction(nameof(GetUser), new { userId = user.UserId, userName = user.UserName }, user);
     }
 
     /// <summary>
-    /// Deletes a user if it exists
+    /// Deletes a user and all of it's Pokemon if it exists
     /// </summary>
     /// <param name="userId">The userId of the user to delete</param>
     /// <returns>A 200 OK response</returns>

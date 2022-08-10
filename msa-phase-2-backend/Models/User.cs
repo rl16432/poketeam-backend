@@ -7,6 +7,7 @@ public class User
 {
     public User()
     {
+        // Creates list of Pokemon on construction
         this.Pokemon = new List<Pokemon>();
     }
 
