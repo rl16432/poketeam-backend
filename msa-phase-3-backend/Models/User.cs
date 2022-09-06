@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace msa_phase_2_backend.Models;
+namespace msa_phase_3_backend.Models;
 
 public class User
 {

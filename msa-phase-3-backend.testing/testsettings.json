@@ -7,6 +7,7 @@
   },
   "PokeapiClientName": "pokeapi",
   "PokeapiAddress": "https://pokeapi.co/api/v2",
+  "PokemonArtworkAddress": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork",
   "ConnectionStrings": {
     "DefaultConnection": "Server=localhost;Database=master;Trusted_Connection=True;"
   },

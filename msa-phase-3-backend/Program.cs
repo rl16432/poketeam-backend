@@ -1,6 +1,6 @@
 using System.Reflection;
-using msa_phase_2_backend.Models;
-using msa_phase_2_backend.Data;
+using msa_phase_3_backend.Models;
+using msa_phase_3_backend.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +31,14 @@ else
     );
 }
 
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+
+// Add CORS
+builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
+{
+    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+}));
+
 // Add HTTP Client
 builder.Services.AddHttpClient(builder.Configuration["PokeapiClientName"], configureClient: client =>
 {
@@ -53,6 +61,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("corsapp");
 
 app.UseHttpsRedirection();
 

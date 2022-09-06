@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using msa_phase_2_backend.Models;
+using msa_phase_3_backend.Models;
 
 #nullable disable
 
-namespace msa_phase_2_backend.Migrations
+namespace msa_phase_3_backend.Migrations
 {
     [DbContext(typeof(UserContext))]
     partial class UserContextModelSnapshot : ModelSnapshot

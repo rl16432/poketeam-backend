@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace msa_phase_2_backend.Models;
+namespace msa_phase_3_backend.Models;
 
 public class UserContext : DbContext
 {

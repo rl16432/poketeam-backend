@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using msa_phase_2_backend.Models;
+using msa_phase_3_backend.Models;
 
 #nullable disable
 
-namespace msa_phase_2_backend.Migrations
+namespace msa_phase_3_backend.Migrations
 {
     [DbContext(typeof(UserContext))]
     [Migration("20220810001609_InitialCreate")]

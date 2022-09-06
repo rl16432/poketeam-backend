@@ -1,6 +1,6 @@
-using msa_phase_2_backend.Models;
-using msa_phase_2_backend.Models.DTO;
-using msa_phase_2_backend.Controllers;
+using msa_phase_3_backend.Models;
+using msa_phase_3_backend.Models.DTO;
+using msa_phase_3_backend.Controllers;
 using System.Text.Json;
 using NSubstitute;
 using System.Net;
@@ -8,8 +8,9 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
-namespace msa_phase_2_backend.testing
+namespace msa_phase_3_backend.testing
 {
     [TestFixture]
     public class Tests
@@ -17,6 +18,7 @@ namespace msa_phase_2_backend.testing
         private IHttpClientFactory httpClientFactoryMock;
         private UserController controller;
         private UserContext userContext;
+        private IConfiguration configuration;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -43,6 +45,11 @@ namespace msa_phase_2_backend.testing
             };
 
             httpClientFactoryMock.CreateClient("pokeapi").Returns(fakeHttpClient);
+
+            configuration = new ConfigurationBuilder()
+                .AddJsonFile("testsettings.json")
+                .AddJsonFile($"testsettings.json", true)
+                .Build();
         }
 
         // Set up after every test
@@ -68,7 +75,7 @@ namespace msa_phase_2_backend.testing
                 config.AddConsole();
             }).CreateLogger<UserController>();
 
-            controller = new UserController(userContext, mockLogger, httpClientFactoryMock);
+            controller = new UserController(userContext, mockLogger, httpClientFactoryMock, configuration);
         }
 
         [Test]
@@ -102,7 +109,7 @@ namespace msa_phase_2_backend.testing
         public async Task CreateUser_ReturnsCreatedAtActionResult()
         {
             var result = await controller.PostUser(new UserCreateDTO { UserName = "Volkner" });
-            
+
             Assert.That(result.Result, Is.InstanceOf<CreatedAtActionResult>());
         }
 
@@ -142,7 +149,7 @@ namespace msa_phase_2_backend.testing
 
             // Count of Pokemon under user should be 1
             Assert.That(updatedUser!.Pokemon, Has.Count.EqualTo(1));
-            Assert.That(updatedUser!.Pokemon.First().Name, Is.EqualTo("litten"));
+            Assert.That(updatedUser!.Pokemon.First().Name, Is.EqualTo("Litten"));
         }
 
         [Test]
@@ -160,7 +167,7 @@ namespace msa_phase_2_backend.testing
 
             // Count of Pokemon under user should be 1
             Assert.That(updatedUser!.Pokemon, Has.Count.EqualTo(1));
-            Assert.That(updatedUser!.Pokemon.First().Name, Is.EqualTo("litten"));
+            Assert.That(updatedUser!.Pokemon.First().Name, Is.EqualTo("Litten"));
         }
     }
 }

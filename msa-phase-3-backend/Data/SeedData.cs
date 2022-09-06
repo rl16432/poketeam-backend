@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using msa_phase_2_backend.Models;
+using msa_phase_3_backend.Models;
 
-namespace msa_phase_2_backend.Data
+namespace msa_phase_3_backend.Data
 {
     // Add dummy users to the database
     // https://docs.microsoft.com/en-us/aspnet/core/tutorials/first-mvc-app/working-with-sql?view=aspnetcore-6.0&tabs=visual-studio

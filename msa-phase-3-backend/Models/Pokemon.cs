@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace msa_phase_2_backend.Models
+namespace msa_phase_3_backend.Models
 {
     public class Pokemon
     {
@@ -20,6 +20,7 @@ namespace msa_phase_2_backend.Models
         public int SpecialAttack { get; set; }
         public int SpecialDefense { get; set; }
         public int Speed { get; set; }
+        public string? Image { get; set; }
     }
 
     public class Stats

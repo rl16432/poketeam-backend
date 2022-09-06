@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using msa_phase_2_backend.Models;
-using msa_phase_2_backend.Models.DTO;
+using msa_phase_3_backend.Models;
+using msa_phase_3_backend.Models.DTO;
 using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
-namespace msa_phase_2_backend.Controllers;
+namespace msa_phase_3_backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -14,8 +15,9 @@ public class UserController : ControllerBase
     private readonly HttpClient _client;
     private readonly UserContext _context;
     private readonly ILogger<UserController> _logger;
-
-    public UserController(UserContext context, ILogger<UserController> logger, IHttpClientFactory clientFactory)
+    private readonly IConfiguration _configuration;
+    
+    public UserController(UserContext context, ILogger<UserController> logger, IHttpClientFactory clientFactory, IConfiguration configuration)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -25,6 +27,7 @@ public class UserController : ControllerBase
             throw new ArgumentNullException(nameof(clientFactory));
         }
         _client = clientFactory.CreateClient("pokeapi");
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
     /// <summary>
@@ -136,7 +139,7 @@ public class UserController : ControllerBase
         var newPokemon = new Pokemon
         {
             PokemonNo = jsonContent!.PokemonId,
-            Name = jsonContent!.Name,
+            Name = Regex.Replace(jsonContent!.Name!, @"(^\w)|(\s\w)", m => m.Value.ToUpper()),
             Attack = jsonContent!.Stats!.FirstOrDefault(s => s!.Stat!.Name!.Equals("attack"))!.BaseStat,
             Defense = jsonContent!.Stats!.FirstOrDefault(s => s!.Stat!.Name!.Equals("defense"))!.BaseStat,
             Hp = jsonContent!.Stats!.FirstOrDefault(s => s!.Stat!.Name!.Equals("hp"))!.BaseStat,
@@ -144,6 +147,9 @@ public class UserController : ControllerBase
             SpecialDefense = jsonContent!.Stats!.FirstOrDefault(s => s!.Stat!.Name!.Equals("special-defense"))!.BaseStat,
             Speed = jsonContent!.Stats!.FirstOrDefault(s => s!.Stat!.Name!.Equals("speed"))!.BaseStat
         };
+
+        Console.WriteLine(_configuration["PokemonArtworkAddress"]);
+        newPokemon.Image = $"{_configuration["PokemonArtworkAddress"]}/{newPokemon.PokemonNo}.png";
 
         // Check if Pokemon already added to user
         if (user.Pokemon.Any(p => p.PokemonNo == newPokemon.PokemonNo))

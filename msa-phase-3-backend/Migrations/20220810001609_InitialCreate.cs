@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace msa_phase_2_backend.Migrations
+namespace msa_phase_3_backend.Migrations
 {
     public partial class InitialCreate : Migration
     {
