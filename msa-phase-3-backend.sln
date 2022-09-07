@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "msa-phase-3-backend.Service
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "msa-phase-3-backend.API", "msa-phase-3-backend.API\msa-phase-3-backend.API.csproj", "{5F92824B-D81A-43B9-9849-5AA02184FE85}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "msa-phase-3-backend.Repository", "msa-phase-3-backend.Repository\msa-phase-3-backend.Repository.csproj", "{A62BD811-0704-4B2C-B160-DCEE3D35FC61}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{5F92824B-D81A-43B9-9849-5AA02184FE85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5F92824B-D81A-43B9-9849-5AA02184FE85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F92824B-D81A-43B9-9849-5AA02184FE85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A62BD811-0704-4B2C-B160-DCEE3D35FC61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A62BD811-0704-4B2C-B160-DCEE3D35FC61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A62BD811-0704-4B2C-B160-DCEE3D35FC61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A62BD811-0704-4B2C-B160-DCEE3D35FC61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,14 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using msa_phase_3_backend.Domain.Models;
 
-namespace msa_phase_3_backend.Domain.Data;
+namespace msa_phase_3_backend.Repository.Data;
 
 public class UserContext : DbContext
 {
-    public UserContext()
-    {
-
-    }
     public UserContext(DbContextOptions<UserContext> options)
         : base(options)
     {

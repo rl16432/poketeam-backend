@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace msa_phase_3_backend.Services.Extensions
+namespace msa_phase_3_backend.Repository.Extensions
 {
     public static class Extensions
     {

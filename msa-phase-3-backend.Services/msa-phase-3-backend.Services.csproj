@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\msa-phase-3-backend.Domain\msa-phase-3-backend.Domain.csproj" />
+    <ProjectReference Include="..\msa-phase-3-backend.Repository\msa-phase-3-backend.Repository.csproj" />
   </ItemGroup>
 
 </Project>

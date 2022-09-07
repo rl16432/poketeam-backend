@@ -1,10 +1,10 @@
-﻿using msa_phase_3_backend.Domain.Data;
+﻿
 using msa_phase_3_backend.Domain.Models;
-using msa_phase_3_backend.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
-using msa_phase_3_backend.Services.IRepository;
+using msa_phase_3_backend.Repository.Data;
+using msa_phase_3_backend.Repository.Extensions;
 
-namespace msa_phase_3_backend.Services.Repository
+namespace msa_phase_3_backend.Repository.Repository
 {
     public class UserRepository : BaseRepository<User>
     {

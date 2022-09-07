@@ -1,6 +1,6 @@
 ﻿using msa_phase_3_backend.Domain.Models;
 using msa_phase_3_backend.Services.ICustomServices;
-using msa_phase_3_backend.Services.Repository;
+using msa_phase_3_backend.Repository.Repository;
 
 namespace msa_phase_3_backend.Services.CustomServices
 {

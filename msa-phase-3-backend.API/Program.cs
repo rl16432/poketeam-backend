@@ -1,12 +1,10 @@
 using System.Reflection;
 using msa_phase_3_backend.Domain.Models;
-using msa_phase_3_backend.Domain.Data;
+using msa_phase_3_backend.Repository.Data;
 using Microsoft.EntityFrameworkCore;
 using msa_phase_3_backend.Services;
-using msa_phase_3_backend.Services.ICustomServices;
 using msa_phase_3_backend.Services.CustomServices;
-using msa_phase_3_backend.Services.IRepository;
-using msa_phase_3_backend.Services.Repository;
+using msa_phase_3_backend.Repository.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,20 +19,25 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
-if (builder.Environment.IsDevelopment())
-{
-    // Use in memory database if in development
-    builder.Services.AddDbContext<UserContext>(opt =>
-        opt.UseInMemoryDatabase("PokeTeam")
-    );
-}
-else
-{
-    // Configure local SQL server database
-    builder.Services.AddDbContext<UserContext>(opt =>
-        opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-    );
-}
+// Configure local SQL server database
+builder.Services.AddDbContext<UserContext>(opt =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+
+//if (builder.Environment.IsDevelopment())
+//{
+//    // Use in memory database if in development
+//    builder.Services.AddDbContext<UserContext>(opt =>
+//        opt.UseInMemoryDatabase("PokeTeam")
+//    );
+//}
+//else
+//{
+//    // Configure local SQL server database
+//    builder.Services.AddDbContext<UserContext>(opt =>
+//        opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+//    );
+//}
 
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 

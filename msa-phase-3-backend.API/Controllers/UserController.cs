@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using msa_phase_3_backend.Domain.Models;
-using msa_phase_3_backend.Domain.Data;
 using msa_phase_3_backend.Domain.Models.DTO;
+using msa_phase_3_backend.Repository.Data;
 using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;

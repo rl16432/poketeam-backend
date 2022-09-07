@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
-using msa_phase_3_backend.Domain.Data;
+using msa_phase_3_backend.Repository.Data;
 using msa_phase_3_backend.Services.CustomServices;
-using msa_phase_3_backend.Services.Repository;
+using msa_phase_3_backend.Repository.Repository;
 
 namespace msa_phase_3_backend.testing
 {

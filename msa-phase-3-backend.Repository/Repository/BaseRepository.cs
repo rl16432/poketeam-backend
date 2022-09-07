@@ -1,10 +1,10 @@
-﻿using msa_phase_3_backend.Domain.Data;
-using msa_phase_3_backend.Domain.Models;
-using msa_phase_3_backend.Services.Extensions;
+﻿using msa_phase_3_backend.Domain.Models;
+using msa_phase_3_backend.Repository.Extensions;
+using msa_phase_3_backend.Repository.Data;
 using Microsoft.EntityFrameworkCore;
-using msa_phase_3_backend.Services.IRepository;
+using msa_phase_3_backend.Repository.IRepository;
 
-namespace msa_phase_3_backend.Services.Repository
+namespace msa_phase_3_backend.Repository.Repository
 {
     public abstract class BaseRepository<T> : IRepository<T> where T : BaseModel
     {
