@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using msa_phase_3_backend.Models;
-using msa_phase_3_backend.Models.DTO;
+using msa_phase_3_backend.Domain.Models;
+using msa_phase_3_backend.Domain.Data;
+using msa_phase_3_backend.Domain.Models.DTO;
 using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
+using msa_phase_3_backend.Services.ICustomServices;
+using msa_phase_3_backend.Services.CustomServices;
 
-namespace msa_phase_3_backend.Controllers;
+namespace msa_phase_3_backend.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -16,10 +19,11 @@ public class UserController : ControllerBase
     private readonly UserContext _context;
     private readonly ILogger<UserController> _logger;
     private readonly IConfiguration _configuration;
-    
-    public UserController(UserContext context, ILogger<UserController> logger, IHttpClientFactory clientFactory, IConfiguration configuration)
+    private readonly PokemonServices _pokemonService;
+    private readonly UserServices _userService;
+
+    public UserController(ILogger<UserController> logger, IHttpClientFactory clientFactory, IConfiguration configuration, UserServices userService, PokemonServices pokemonService, UserContext context)
     {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         if (clientFactory is null)
@@ -28,6 +32,9 @@ public class UserController : ControllerBase
         }
         _client = clientFactory.CreateClient("pokeapi");
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _pokemonService = pokemonService ?? throw new ArgumentNullException(nameof(pokemonService));
+        _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+        _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
     /// <summary>
@@ -35,9 +42,9 @@ public class UserController : ControllerBase
     /// </summary>
     /// <returns>A response with the list of users</returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+    public ActionResult<IEnumerable<User>> GetUsers()
     {
-        var users = await _context.Users.Include("Pokemon").ToListAsync();
+        var users = _userService.GetAll();
         return Ok(users);
     }
 
@@ -47,9 +54,9 @@ public class UserController : ControllerBase
     /// <param name="userId">The userId of the user to return</param>
     /// <returns>The user with that userId, or a 404 response if the user does not exist</returns>
     [HttpGet("{userId}")]
-    public async Task<ActionResult<User>> GetUser(int userId)
+    public ActionResult<User> GetUser(int userId)
     {
-        var user = await _context.Users.Include("Pokemon").FirstOrDefaultAsync(u => u.UserId == userId);
+        var user = _userService.Get(userId);
 
         if (user == null)
         {
@@ -66,13 +73,12 @@ public class UserController : ControllerBase
     /// <returns>A 201 success code if the user has been created, along with the new user</returns>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<ActionResult<User>> PostUser(UserCreateDTO userCreateDto)
+    public ActionResult<User> PostUser(UserCreateDTO userCreateDto)
     {
         var user = new User { UserName = userCreateDto.UserName, Pokemon = new List<Pokemon>() };
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        _userService.Insert(user);
 
-        return CreatedAtAction(nameof(GetUser), new { userId = user.UserId, userName = user.UserName }, user);
+        return CreatedAtAction(nameof(GetUser), new { userId = user.Id, userName = user.UserName }, user);
     }
 
     /// <summary>
@@ -81,20 +87,9 @@ public class UserController : ControllerBase
     /// <param name="userId">The userId of the user to delete</param>
     /// <returns>A 200 OK response</returns>
     [HttpDelete("{userId}")]
-    public async Task<IActionResult> DeleteUser(int userId)
+    public IActionResult DeleteUser(int userId)
     {
-        var user = await _context.Users.Include("Pokemon").FirstOrDefaultAsync(u => u.UserId == userId);
-        if (user is null)
-        {
-            return Ok();
-        }
-        // Remove all Pokemon attributed to user
-        foreach (Pokemon p in user.Pokemon!)
-        {
-            _context.Pokemon.Remove(p);
-        }
-        _context.Users.Remove(user);
-        await _context.SaveChangesAsync();
+        _userService.DeleteById(userId);
 
         return Ok();
     }
@@ -110,7 +105,7 @@ public class UserController : ControllerBase
     public async Task<ActionResult<User>> AddPokemonToUser(int userId, [Required] string pokemon)
     {
         // Find user by ID
-        var user = await _context.Users.Include("Pokemon").FirstOrDefaultAsync(u => u.UserId == userId);
+        var user = _userService.Get(userId);
 
         if (user == null)
         {
@@ -148,7 +143,6 @@ public class UserController : ControllerBase
             Speed = jsonContent!.Stats!.FirstOrDefault(s => s!.Stat!.Name!.Equals("speed"))!.BaseStat
         };
 
-        Console.WriteLine(_configuration["PokemonArtworkAddress"]);
         newPokemon.Image = $"{_configuration["PokemonArtworkAddress"]}/{newPokemon.PokemonNo}.png";
 
         // Check if Pokemon already added to user
@@ -158,11 +152,12 @@ public class UserController : ControllerBase
         }
 
         // Add Pokemon to database first
-        _context.Pokemon.Add(newPokemon);
+        _pokemonService.Insert(newPokemon);
+        
         // Link new Pokemon to user
         user.Pokemon.Add(newPokemon);
 
-        await _context.SaveChangesAsync();
+        _userService.Update(user);
 
         return NoContent();
     }
@@ -174,20 +169,24 @@ public class UserController : ControllerBase
     /// <param name="pokemon">The name of the Pokemon to delete</param>
     /// <returns>A 200 OK Response</returns>
     [HttpDelete("{userId}/Pokemon")]
-    public async Task<IActionResult> DeletePokemonFromUser(int userId, [Required] string pokemon)
+    public IActionResult DeletePokemonFromUser(int userId, [Required] string pokemon)
     {
-        var user = await _context.Users.Include("Pokemon").FirstOrDefaultAsync(u => u.UserId == userId);
+        // Find user by ID
+        var user = _userService.Get(userId);
 
         if (user == null)
         {
             return NotFound("User does not exist");
         }
-
-        // Remove Pokemon
-        if (user.Pokemon!.Any(p => p.Name!.Equals(pokemon.ToLower())))
+        else if (user.Pokemon == null || user.Pokemon.Count == 0)
         {
-            user.Pokemon!.Remove(user.Pokemon.First(p => p.Name!.Equals(pokemon.ToLower())));
-            await _context.SaveChangesAsync();
+            return Ok();
+        }
+        // Remove Pokemon
+        else
+        {
+            user.Pokemon!.Remove(user.Pokemon.First(p => p.Name!.ToLower().Equals(pokemon.ToLower())));
+            _userService.Update(user);
         }
         return Ok();
     }

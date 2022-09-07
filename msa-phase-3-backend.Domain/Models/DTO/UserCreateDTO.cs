@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace msa_phase_3_backend.Models.DTO
+namespace msa_phase_3_backend.Domain.Models.DTO
 {
     public class UserCreateDTO
     {

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>msa_phase_3_backend.testing</RootNamespace>
+    <RootNamespace>msa_phase_3_backend.Testing</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -31,7 +31,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\msa-phase-3-backend\msa-phase-3-backend.csproj" />
+    <ProjectReference Include="..\msa-phase-3-backend.API\msa-phase-3-backend.API.csproj" />
+    <ProjectReference Include="..\msa-phase-3-backend.Domain\msa-phase-3-backend.Domain.csproj" />
+    <ProjectReference Include="..\msa-phase-3-backend.Services\msa-phase-3-backend.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

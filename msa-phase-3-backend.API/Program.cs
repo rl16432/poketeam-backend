@@ -1,7 +1,12 @@
 using System.Reflection;
-using msa_phase_3_backend.Models;
-using msa_phase_3_backend.Data;
+using msa_phase_3_backend.Domain.Models;
+using msa_phase_3_backend.Domain.Data;
 using Microsoft.EntityFrameworkCore;
+using msa_phase_3_backend.Services;
+using msa_phase_3_backend.Services.ICustomServices;
+using msa_phase_3_backend.Services.CustomServices;
+using msa_phase_3_backend.Services.IRepository;
+using msa_phase_3_backend.Services.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +37,13 @@ else
 }
 
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+
+// Add dependencies for repository and DB services
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<PokemonRepository>();
+
+builder.Services.AddScoped<UserServices>();
+builder.Services.AddScoped<PokemonServices>();
 
 // Add CORS
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>

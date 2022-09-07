@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace msa_phase_3_backend.Models
+namespace msa_phase_3_backend.Domain.Models
 {
     public class PokeApi
     {
