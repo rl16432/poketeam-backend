@@ -24,12 +24,6 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: azure/appconfiguration-sync@v1 
-      with: 
-        configurationFile: 'appsettings.json' 
-        format: 'json' 
-        connectionString: ${{ secrets.DEFAULT_CONNECTION }} 
-        separator: ':' 
     - name: Setup .NET Cores
       uses: actions/setup-dotnet@v1
       with:
