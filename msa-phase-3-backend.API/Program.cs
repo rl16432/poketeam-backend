@@ -9,6 +9,8 @@ using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("appsettings.json", false, true);
+
 //Add services to the container.
 builder.Services.AddControllers();
 
