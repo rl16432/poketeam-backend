@@ -58,7 +58,7 @@ builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 }));
 
 // Add HTTP Client
-builder.Services.AddHttpClient(builder.Configuration["PokeapiClientName"], configureClient: client =>
+builder.Services.AddHttpClient("pokeapi", configureClient: client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["PokeapiAddress"]);
 });
