@@ -73,6 +73,25 @@ namespace msa_phase_3_backend.Services.CustomServices
                 throw;
             }
         }
+        public User GetByUserName(string userName)
+        {
+            try
+            {
+                var obj = _userRepository.GetByUserName(userName);
+                if (obj != null)
+                {
+                    return obj;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public IEnumerable<User> GetAll()
         {
             try
@@ -112,7 +131,7 @@ namespace msa_phase_3_backend.Services.CustomServices
             {
                 if (entity != null)
                 {
-                    _userRepository.Remove(entity);
+                    _userRepository.Delete(entity);
                 }
             }
             catch (Exception)

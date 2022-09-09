@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using msa_phase_3_backend.Domain.Models;
 using msa_phase_3_backend.Domain.Models.DTO;
 using msa_phase_3_backend.Repository.Data;
 using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
-using msa_phase_3_backend.Services.ICustomServices;
 using msa_phase_3_backend.Services.CustomServices;
+using FluentValidation;
 
 namespace msa_phase_3_backend.API.Controllers;
 
@@ -19,10 +18,13 @@ public class UserController : ControllerBase
     private readonly UserContext _context;
     private readonly ILogger<UserController> _logger;
     private readonly IConfiguration _configuration;
+    private readonly IValidator<User> _userValidator;
     private readonly PokemonServices _pokemonService;
     private readonly UserServices _userService;
 
-    public UserController(ILogger<UserController> logger, IHttpClientFactory clientFactory, IConfiguration configuration, UserServices userService, PokemonServices pokemonService, UserContext context)
+    public UserController(ILogger<UserController> logger, IHttpClientFactory clientFactory, IConfiguration configuration,
+        UserServices userService, PokemonServices pokemonService, UserContext context,
+        IValidator<User> userValidator)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -32,6 +34,7 @@ public class UserController : ControllerBase
         }
         _client = clientFactory.CreateClient("pokeapi");
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _userValidator = userValidator ?? throw new ArgumentNullException(nameof(userValidator));
         _pokemonService = pokemonService ?? throw new ArgumentNullException(nameof(pokemonService));
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -51,12 +54,12 @@ public class UserController : ControllerBase
     /// <summary>
     /// Gets a single user
     /// </summary>
-    /// <param name="userId">The userId of the user to return</param>
-    /// <returns>The user with that userId, or a 404 response if the user does not exist</returns>
-    [HttpGet("{userId}")]
-    public ActionResult<User> GetUser(int userId)
+    /// <param name="userName">The user name of the user to return</param>
+    /// <returns>The user with that user name, or a 404 response if the user does not exist</returns>
+    [HttpGet("{userName}")]
+    public ActionResult<User> GetUser(string userName)
     {
-        var user = _userService.Get(userId);
+        var user = _userService.GetByUserName(userName);
 
         if (user == null)
         {
@@ -73,12 +76,24 @@ public class UserController : ControllerBase
     /// <returns>A 201 success code if the user has been created, along with the new user</returns>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public ActionResult<User> PostUser(UserCreateDTO userCreateDto)
+    public async Task<ActionResult<User>> PostUser(UserCreateDTO userCreateDto)
     {
+        var userExists = _userService.GetByUserName(userCreateDto.UserName);
+        if (userExists != null)
+        {
+            return Conflict("Username already exists");
+        }
         var user = new User { UserName = userCreateDto.UserName, Pokemon = new List<Pokemon>() };
+
+        // FluentValidation to check the user name is valid
+        FluentValidation.Results.ValidationResult result = await _userValidator.ValidateAsync(user);
+        if (!result.IsValid)
+        {
+            return BadRequest(result.Errors.Select(err => err.ErrorMessage));
+        }
         _userService.Insert(user);
 
-        return CreatedAtAction(nameof(GetUser), new { userId = user.Id, userName = user.UserName }, user);
+        return CreatedAtAction(nameof(PostUser), new { userId = user.userId, userName = user.UserName }, user);
     }
 
     /// <summary>
@@ -112,6 +127,11 @@ public class UserController : ControllerBase
             return NotFound("User does not exist");
         }
 
+        if (user?.Pokemon?.Count >= 6)
+        {
+            return BadRequest("User already has 6 Pokemon");
+        }
+
         // Call on PokeApi
         var res = await _client.GetAsync($"/api/v2/pokemon/{pokemon.ToLower()}");
 
@@ -125,7 +145,7 @@ public class UserController : ControllerBase
         var jsonContent = JsonSerializer.Deserialize<PokeApi>(content);
 
         // Initialise list if not existant in user
-        if (user.Pokemon == null)
+        if (user!.Pokemon == null)
         {
             user.Pokemon = new List<Pokemon>();
         }
@@ -153,7 +173,7 @@ public class UserController : ControllerBase
 
         // Add Pokemon to database first
         _pokemonService.Insert(newPokemon);
-        
+
         // Link new Pokemon to user
         user.Pokemon.Add(newPokemon);
 
@@ -185,7 +205,7 @@ public class UserController : ControllerBase
         // Remove Pokemon
         else
         {
-            user.Pokemon!.Remove(user.Pokemon.First(p => p.Name!.ToLower().Equals(pokemon.ToLower())));
+            user.Pokemon!.Remove(user.Pokemon.FirstOrDefault(p => p.Name!.ToLower().Equals(pokemon.ToLower()))!);
             _userService.Update(user);
         }
         return Ok();

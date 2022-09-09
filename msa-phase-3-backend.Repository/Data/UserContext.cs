@@ -12,6 +12,10 @@ public class UserContext : DbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<User>()
+            .HasIndex(u => u.UserName)
+            .IsUnique();
     }
 
     public virtual DbSet<User> Users { get; set; } = default!;

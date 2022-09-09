@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using msa_phase_3_backend.Services;
 using msa_phase_3_backend.Services.CustomServices;
 using msa_phase_3_backend.Repository.Repository;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +48,8 @@ builder.Services.AddScoped<PokemonRepository>();
 
 builder.Services.AddScoped<UserServices>();
 builder.Services.AddScoped<PokemonServices>();
+
+builder.Services.AddScoped<IValidator<User>, UserValidator>();
 
 // Add CORS
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>

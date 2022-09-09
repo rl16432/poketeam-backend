@@ -9,7 +9,6 @@ namespace msa_phase_3_backend.Repository.IRepository
         void Insert(T entity);
         void Update(T entity);
         void Delete(T entity);
-        void Remove(T entity);
         void SaveChanges();
     }
 }

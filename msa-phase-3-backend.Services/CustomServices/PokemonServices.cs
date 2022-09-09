@@ -83,7 +83,7 @@ namespace msa_phase_3_backend.Services.CustomServices
             {
                 if (entity != null)
                 {
-                    _pokemonRepository.Remove(entity);
+                    _pokemonRepository.Delete(entity);
                 }
             }
             catch (Exception)

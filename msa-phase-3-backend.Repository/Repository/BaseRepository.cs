@@ -41,14 +41,6 @@ namespace msa_phase_3_backend.Repository.Repository
             entities.Add(entity);
             _userContext.SaveChanges();
         }
-        public virtual void Remove(T entity)
-        {
-            if (entity == null)
-            {
-                throw new ArgumentNullException("entity");
-            }
-            entities.Remove(entity);
-        }
         public virtual void SaveChanges()
         {
             _userContext.SaveChanges();

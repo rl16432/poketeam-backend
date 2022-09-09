@@ -12,7 +12,7 @@ using msa_phase_3_backend.Repository.Data;
 namespace msa_phase_3_backend.Repository.Migrations
 {
     [DbContext(typeof(UserContext))]
-    [Migration("20220907222202_InitialCreate")]
+    [Migration("20220909103508_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,29 +60,35 @@ namespace msa_phase_3_backend.Repository.Migrations
                     b.Property<int>("Speed")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int?>("userId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("userId");
 
                     b.ToTable("Pokemon");
                 });
 
             modelBuilder.Entity("msa_phase_3_backend.Domain.Models.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("userId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("userId"), 1L, 1);
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("Id");
+                    b.HasKey("userId");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -91,7 +97,7 @@ namespace msa_phase_3_backend.Repository.Migrations
                 {
                     b.HasOne("msa_phase_3_backend.Domain.Models.User", null)
                         .WithMany("Pokemon")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("userId");
                 });
 
             modelBuilder.Entity("msa_phase_3_backend.Domain.Models.User", b =>
