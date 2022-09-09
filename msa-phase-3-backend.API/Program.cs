@@ -9,10 +9,10 @@ using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.json", false, true);
-
 //Add services to the container.
 builder.Services.AddControllers();
+
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -24,7 +24,7 @@ builder.Services.AddSwaggerGen(options =>
 
 // Configure local SQL server database
 builder.Services.AddDbContext<UserContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Server=localhost;Database=master;Trusted_Connection=True;")
 );
 
 //if (builder.Environment.IsDevelopment())
@@ -42,7 +42,7 @@ builder.Services.AddDbContext<UserContext>(opt =>
 //    );
 //}
 
-builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+
 
 // Add dependencies for repository and DB services
 builder.Services.AddScoped<UserRepository>();
@@ -60,9 +60,9 @@ builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 }));
 
 // Add HTTP Client
-builder.Services.AddHttpClient("pokeapi", configureClient: client =>
+builder.Services.AddHttpClient(builder.Configuration["PokeapiClientName"] ?? "pokeapi", configureClient: client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["PokeapiAddress"]);
+    client.BaseAddress = new Uri(builder.Configuration["PokeapiAddress"] ?? "https://pokeapi.co/api/v2");
 });
 
 var app = builder.Build();
