@@ -19,9 +19,9 @@ public class User : BaseModel
     public new int Id { get; set; }
 
     [Required]
-    public string UserName { get; set; } = null!;
+    public string UserName { get; set; } = string.Empty;
     
-    public ICollection<Pokemon>? Pokemon { get; set; }
+    public ICollection<Pokemon> Pokemon { get; set; }
 }
 
 public class UserValidator : AbstractValidator<User>

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace msa_phase_3_backend.Domain.Models
 {
@@ -11,16 +12,24 @@ namespace msa_phase_3_backend.Domain.Models
         [Required]
         public new int Id { get; set; }
         [Required]
+        [JsonPropertyName("pokemonNo")]
         public int PokemonNo { get; set; }
         [Required]
-        public string? Name { get; set; }
-
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+        [JsonPropertyName("hp")]
         public int Hp { get; set; }
+        [JsonPropertyName("attack")]
         public int Attack { get; set; }
+        [JsonPropertyName("defense")]
         public int Defense { get; set; }
+        [JsonPropertyName("specialAttack")]
         public int SpecialAttack { get; set; }
+        [JsonPropertyName("specialDefense")]
         public int SpecialDefense { get; set; }
+        [JsonPropertyName("speed")]
         public int Speed { get; set; }
-        public string? Image { get; set; }
+        [JsonPropertyName("image")]
+        public string Image { get; set; } = string.Empty;
     }
 }

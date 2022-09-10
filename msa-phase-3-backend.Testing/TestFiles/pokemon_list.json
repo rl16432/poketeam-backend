@@ -1,0 +1,68 @@
+[
+  {
+    "pokemonNo": 486,
+    "name": "Regigigas",
+    "hp": 110,
+    "attack": 160,
+    "defense": 110,
+    "specialAttack": 80,
+    "specialDefense": 110,
+    "speed": 100,
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/486.png"
+  },
+  {
+    "pokemonNo": 251,
+    "name": "Celebi",
+    "hp": 100,
+    "attack": 100,
+    "defense": 100,
+    "specialAttack": 100,
+    "specialDefense": 100,
+    "speed": 100,
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/251.png"
+  },
+  {
+    "pokemonNo": 10007,
+    "name": "Giratina-origin",
+    "hp": 150,
+    "attack": 120,
+    "defense": 100,
+    "specialAttack": 120,
+    "specialDefense": 100,
+    "speed": 90,
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10007.png"
+  },
+  {
+    "pokemonNo": 7,
+    "name": "Squirtle",
+    "hp": 44,
+    "attack": 48,
+    "defense": 65,
+    "specialAttack": 50,
+    "specialDefense": 64,
+    "speed": 43,
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png"
+  },
+  {
+    "pokemonNo": 9,
+    "name": "Blastoise",
+    "hp": 79,
+    "attack": 83,
+    "defense": 100,
+    "specialAttack": 85,
+    "specialDefense": 105,
+    "speed": 78,
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png"
+  },
+  {
+    "pokemonNo": 730,
+    "name": "Primarina",
+    "hp": 80,
+    "attack": 74,
+    "defense": 74,
+    "specialAttack": 126,
+    "specialDefense": 116,
+    "speed": 60,
+    "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/730.png"
+  }
+]

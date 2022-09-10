@@ -124,7 +124,7 @@ public class UserController : ControllerBase
             return NotFound("User does not exist");
         }
 
-        if (user?.Pokemon?.Count >= 6)
+        if (user.Pokemon.Count >= 6)
         {
             return BadRequest("User already has 6 Pokemon");
         }
@@ -142,7 +142,7 @@ public class UserController : ControllerBase
         var jsonContent = JsonSerializer.Deserialize<PokeApi>(content);
 
         // Initialise list if not existant in user
-        if (user!.Pokemon == null)
+        if (user.Pokemon == null)
         {
             user.Pokemon = new List<Pokemon>();
         }
@@ -202,8 +202,13 @@ public class UserController : ControllerBase
         // Remove Pokemon
         else
         {
-            user.Pokemon!.Remove(user.Pokemon.FirstOrDefault(p => p.Name!.ToLower().Equals(pokemon.ToLower()))!);
-            _userService.Update(user);
+            var pokemonObj = user.Pokemon.FirstOrDefault(p => p.Name!.ToLower().Equals(pokemon.ToLower()));
+            if (pokemonObj != null)
+            {
+                user.Pokemon!.Remove(pokemonObj);
+                _pokemonService.Delete(pokemonObj);
+                _userService.Update(user);
+            }
         }
         return Ok();
     }
