@@ -19,6 +19,7 @@ namespace msa_phase_3_backend.testing
     public class ServicesTests
     {
         private UserServices userService;
+        private PokemonServices pokemonService;
         private UserContext userContext;
         private PokemonRepository pokemonRepository;
         private UserRepository userRepository;
@@ -50,6 +51,16 @@ namespace msa_phase_3_backend.testing
             userRepository = new UserRepository(userContext);
 
             userService = new UserServices(userRepository, pokemonRepository);
+            pokemonService = new PokemonServices(pokemonRepository);
+        }
+
+        [Test]
+        public void GetUserById_GetsCorrectUserName()
+        {
+            int userId = 1;
+            var result = userService.Get(userId);
+            Assert.NotNull(result);
+            Assert.That(result.UserName, Is.EqualTo("Bianca"));
         }
 
         [Test]
@@ -61,5 +72,6 @@ namespace msa_phase_3_backend.testing
             Assert.That(result.UserName, Is.EqualTo("Bianca"));
 
         }
+
     }
 }

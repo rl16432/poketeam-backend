@@ -27,6 +27,7 @@ namespace msa_phase_3_backend.Services.CustomServices
                 throw;
             }
         }
+
         /// <summary>
         /// Delete a user and all its Pokemon
         /// </summary>
@@ -42,6 +43,7 @@ namespace msa_phase_3_backend.Services.CustomServices
                 }
                 if (user != null && user.Pokemon != null)
                 {
+                    // Deletes all Pokemon attributed to user in PokemonRepository
                     foreach (Pokemon pokemon in user.Pokemon)
                     {
                         _pokemonRepository.Delete(pokemon);
