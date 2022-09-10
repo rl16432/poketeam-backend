@@ -58,32 +58,29 @@ namespace msa_phase_3_backend.Repository.Migrations
                     b.Property<int>("Speed")
                         .HasColumnType("int");
 
-                    b.Property<int?>("userId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("userId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Pokemon");
                 });
 
             modelBuilder.Entity("msa_phase_3_backend.Domain.Models.User", b =>
                 {
-                    b.Property<int>("userId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("userId"), 1L, 1);
-
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("userId");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserName")
                         .IsUnique();
@@ -95,7 +92,7 @@ namespace msa_phase_3_backend.Repository.Migrations
                 {
                     b.HasOne("msa_phase_3_backend.Domain.Models.User", null)
                         .WithMany("Pokemon")
-                        .HasForeignKey("userId");
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("msa_phase_3_backend.Domain.Models.User", b =>

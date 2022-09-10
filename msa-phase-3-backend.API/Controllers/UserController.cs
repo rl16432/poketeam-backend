@@ -93,7 +93,7 @@ public class UserController : ControllerBase
         }
         _userService.Insert(user);
 
-        return CreatedAtAction(nameof(PostUser), new { userId = user.userId, userName = user.UserName }, user);
+        return CreatedAtAction(nameof(PostUser), new { userId = user.Id, userName = user.UserName }, user);
     }
 
     /// <summary>

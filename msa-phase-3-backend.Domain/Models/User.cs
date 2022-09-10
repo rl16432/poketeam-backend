@@ -16,7 +16,7 @@ public class User : BaseModel
     [Key]
     [Required]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int userId { get; set; }
+    public new int Id { get; set; }
 
     [Required]
     public string UserName { get; set; } = null!;

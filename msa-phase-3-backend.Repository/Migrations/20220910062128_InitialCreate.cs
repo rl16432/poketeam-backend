@@ -12,14 +12,13 @@ namespace msa_phase_3_backend.Repository.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    userId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserName = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserName = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.userId);
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -37,22 +36,22 @@ namespace msa_phase_3_backend.Repository.Migrations
                     SpecialDefense = table.Column<int>(type: "int", nullable: false),
                     Speed = table.Column<int>(type: "int", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    userId = table.Column<int>(type: "int", nullable: true)
+                    UserId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Pokemon", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Pokemon_Users_userId",
-                        column: x => x.userId,
+                        name: "FK_Pokemon_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "userId");
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Pokemon_userId",
+                name: "IX_Pokemon_UserId",
                 table: "Pokemon",
-                column: "userId");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_UserName",

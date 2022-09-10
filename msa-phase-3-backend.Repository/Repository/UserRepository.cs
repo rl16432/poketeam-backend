@@ -13,7 +13,7 @@ namespace msa_phase_3_backend.Repository.Repository
         }
         public override User Get(int userId)
         {
-            return entities.IncludeMultiple(user => user.Pokemon!).SingleOrDefault(user => user.userId == userId)!;
+            return entities.IncludeMultiple(user => user.Pokemon!).SingleOrDefault(user => user.Id == userId)!;
         }
         public User GetByUserName(string userName)
         {
@@ -26,7 +26,7 @@ namespace msa_phase_3_backend.Repository.Repository
 
         public void DeleteById(int userId)
         {
-            var user = entities.IncludeMultiple(user => user.Pokemon!).SingleOrDefault(user => user.userId == userId);
+            var user = entities.IncludeMultiple(user => user.Pokemon!).SingleOrDefault(user => user.Id == userId);
             entities.Remove(user!);
             _userContext.SaveChanges();
         }
