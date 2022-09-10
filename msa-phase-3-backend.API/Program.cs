@@ -22,24 +22,24 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
-// Configure local SQL server database
-builder.Services.AddDbContext<UserContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+//// Configure local SQL server database
+//builder.Services.AddDbContext<UserContext>(opt =>
+//    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+//);
 
-//if (builder.Configuration.GetConnectionString("DefaultConnection") == null)
-//{
-//    builder.Services.AddDbContext<UserContext>(opt =>
-//        opt.UseInMemoryDatabase("PokeTeam")
-//    );
-//}
-//else
-//{
-//    // Configure local SQL server database
-//    builder.Services.AddDbContext<UserContext>(opt =>
-//        opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-//    );
-//}
+if (builder.Configuration.GetConnectionString("DefaultConnection") == null)
+{
+    builder.Services.AddDbContext<UserContext>(opt =>
+        opt.UseInMemoryDatabase("PokeTeam")
+    );
+}
+else
+{
+    // Configure local SQL server database
+    builder.Services.AddDbContext<UserContext>(opt =>
+        opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+    );
+}
 
 // Add dependencies for repository and DB services
 builder.Services.AddScoped<UserRepository>();
