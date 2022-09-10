@@ -64,7 +64,7 @@ namespace msa_phase_3_backend.testing
         }
 
         [Test]
-        public void GetUserById_GetsCorrectUserName()
+        public void GetUserById_GetsCorrectUserNme()
         {
             int userId = 1;
             var result = userService.Get(userId);
