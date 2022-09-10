@@ -15,7 +15,6 @@ namespace msa_phase_3_backend.API.Controllers;
 public class UserController : ControllerBase
 {
     private readonly HttpClient _client;
-    private readonly UserContext _context;
     private readonly ILogger<UserController> _logger;
     private readonly IConfiguration _configuration;
     private readonly IValidator<User> _userValidator;
@@ -23,8 +22,7 @@ public class UserController : ControllerBase
     private readonly UserServices _userService;
 
     public UserController(ILogger<UserController> logger, IHttpClientFactory clientFactory, IConfiguration configuration,
-        UserServices userService, PokemonServices pokemonService, UserContext context,
-        IValidator<User> userValidator)
+        UserServices userService, PokemonServices pokemonService, IValidator<User> userValidator)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -37,7 +35,6 @@ public class UserController : ControllerBase
         _userValidator = userValidator ?? throw new ArgumentNullException(nameof(userValidator));
         _pokemonService = pokemonService ?? throw new ArgumentNullException(nameof(pokemonService));
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-        _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
     /// <summary>

@@ -19,7 +19,7 @@ namespace msa_phase_3_backend.Repository.Repository
         {
             if (entity == null)
             {
-                throw new ArgumentNullException("entity");
+                throw new ArgumentNullException(nameof(entity));
             }
             entities.Remove(entity);
             _userContext.SaveChanges();
@@ -36,7 +36,7 @@ namespace msa_phase_3_backend.Repository.Repository
         {
             if (entity == null)
             {
-                throw new ArgumentNullException("entity");
+                throw new ArgumentNullException(nameof(entity));
             }
             entities.Add(entity);
             _userContext.SaveChanges();
@@ -49,7 +49,7 @@ namespace msa_phase_3_backend.Repository.Repository
         {
             if (entity == null)
             {
-                throw new ArgumentNullException("entity");
+                throw new ArgumentNullException(nameof(entity));
             }
             entities.Update(entity);
             _userContext.SaveChanges();

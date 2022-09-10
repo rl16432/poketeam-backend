@@ -35,7 +35,7 @@ if (builder.Configuration.GetConnectionString("DefaultConnection") == null)
 }
 else
 {
-    // Configure local SQL server database
+    // Configure local/Azure SQL server database
     builder.Services.AddDbContext<UserContext>(opt =>
         opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
     );

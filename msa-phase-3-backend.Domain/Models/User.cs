@@ -31,6 +31,7 @@ public class UserValidator : AbstractValidator<User>
         // Username between 5 and 20 characters
         RuleFor(x => x.UserName).NotEmpty().WithMessage("Username is required").Length(5, 20);
         RuleFor(x => x.Pokemon).NotNull();
+        RuleFor(x => x.Pokemon).Must(x => x!.Count <= 6).WithMessage("User already has 6 Pokemon");
     }
 }
 

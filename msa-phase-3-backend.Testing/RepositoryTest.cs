@@ -13,11 +13,9 @@ using msa_phase_3_backend.Repository.Repository;
 namespace msa_phase_3_backend.testing
 {
     [TestFixture]
-    [Category("UserServices")]
-    public class ServicesTests
+    [Category("Repositories")]
+    public class RepositoryTest
     {
-        private UserServices userService;
-        private PokemonServices pokemonService;
         private UserContext userContext;
         private PokemonRepository pokemonRepository;
         private UserRepository userRepository;
@@ -48,16 +46,13 @@ namespace msa_phase_3_backend.testing
 
             pokemonRepository = new PokemonRepository(userContext);
             userRepository = new UserRepository(userContext);
-
-            userService = new UserServices(userRepository, pokemonRepository);
-            pokemonService = new PokemonServices(pokemonRepository);
         }
 
         [Test]
         public void GetUserById_GetsCorrectUserName()
         {
             int userId = 1;
-            var result = userService.Get(userId);
+            var result = userRepository.Get(userId);
             result.Should().NotBeNull();
             result.UserName.Should().BeEquivalentTo("Bianca");
         }
@@ -65,26 +60,25 @@ namespace msa_phase_3_backend.testing
         public void GetUserByUserName_GetsCorrectUser()
         {
             string userName = "Skyla";
-            var result = userService.GetByUserName(userName);
+            var result = userRepository.GetByUserName(userName);
             result.Should().NotBeNull();
             result.UserName.Should().BeEquivalentTo("Skyla");
         }
         [Test]
-        public void GetNonExistentUser_ReturnsNull()
+        public void GetNonExistentUsers_ReturnsNull()
         {
             string userName = "Jack";
-            var result = userService.GetByUserName(userName);
+            var result = userRepository.GetByUserName(userName);
             result.Should().BeNull();
 
             int userId = 20;
-            var result_2 = userService.Get(userId);
+            var result_2 = userRepository.Get(userId);
             result_2.Should().BeNull();
         }
-
         [Test]
         public void GetAllUsers_GetsAllUsers()
         {
-            var result = userService.GetAll();
+            var result = userRepository.GetAll();
 
             result.Should().NotBeNull();
             result.Count().Should().Be(4);
@@ -94,9 +88,9 @@ namespace msa_phase_3_backend.testing
         public void DeleteById_RemovesUser()
         {
             var userId = 2;
-            userService.DeleteById(userId);
+            userRepository.DeleteById(userId);
 
-            var result = userService.GetAll();
+            var result = userRepository.GetAll();
 
             result.Should().NotBeNull();
             result.Count().Should().Be(3);
@@ -108,9 +102,9 @@ namespace msa_phase_3_backend.testing
         public void InsertUser_AddsUser()
         {
             var newUser = new User { UserName = "Jack" };
-            userService.Insert(newUser);
+            userRepository.Insert(newUser);
 
-            var result = userService.GetAll();
+            var result = userRepository.GetAll();
 
             result.Should().NotBeNull();
             result.Count().Should().Be(5);
@@ -120,14 +114,13 @@ namespace msa_phase_3_backend.testing
         [Test]
         public void UpdateUser_UpdatesUser()
         {
-
             int userId = 1;
-            var result = userService.Get(userId);
+            var result = userRepository.Get(userId);
 
             result.UserName = "Cheren";
-            userService.Update(result);
+            userRepository.Update(result);
 
-            var result_2 = userService.Get(userId);
+            var result_2 = userRepository.Get(userId);
 
             result_2.Should().NotBeNull();
             result_2.UserName.Should().BeEquivalentTo("Cheren");

@@ -30,14 +30,7 @@ namespace msa_phase_3_backend.Services.CustomServices
             try
             {
                 var obj = _pokemonRepository.Get(Id);
-                if (obj != null)
-                {
-                    return obj;
-                }
-                else
-                {
-                    return null;
-                }
+                return obj;
             }
             catch (Exception)
             {
@@ -49,14 +42,7 @@ namespace msa_phase_3_backend.Services.CustomServices
             try
             {
                 var obj = _pokemonRepository.GetAll();
-                if (obj != null)
-                {
-                    return obj;
-                }
-                else
-                {
-                    return null;
-                }
+                return obj;
             }
             catch (Exception)
             {
