@@ -5,69 +5,46 @@ This API performs CRUD operations to create, read, update and delete users, whil
 ## PokeApi
 https://pokeapi.co
 
-## Configuration files
+## Onion Architecture
 
-**appsettings.json**
+Onion architecture was utilised in this project with domain, repository, services and presentation layers which are increasingly further from the domain, and closer to the 'presentation'. This architecture allows for separation of concerns, with different layers performing different functions closer or further from the domain. 
 
-![image](https://user-images.githubusercontent.com/65014987/183883962-fd0a21c7-053d-4445-9314-b3182156937d.png)
+![image](https://user-images.githubusercontent.com/65014987/189576074-c3a9fd25-e5f5-453e-909e-6ede48f55338.png)
 
-**appsettings.Development.json**
+- The domain layer consists of the database models as well as the model defining the response from PokeAPI.
+- The repository layer defines classes which interact with the database. This includes database migrations, database contexts and read/write operations
+- The services layer contains the logic used by the controller and references operations defined in the repository layer
+- The presentation layer contains the controller and uses the logic defined in services to present data to the user through an API
 
-![image](https://user-images.githubusercontent.com/65014987/183884048-47ba522a-a487-4c51-a2a8-a6b3698da7ca.png)
+## Entity Framework Core
 
-The non-development configuration is configured to connect to a locally hosted SQL Server database, and the connection string is provided. To set up a local SQL Server, simply choose the Developer installation from [this link](https://www.microsoft.com/en-us/sql-server/sql-server-downloads).
+The ASP.NET minimal API makes use of EF Core to connect to a local/production SQL Server database. The default connection string is specified in appsettings.json. The database context is injected into the application and operations are performed on the specified database.
 
-The development logging level for "Microsoft.AspNetCore" libraries is set to "Information", in order to provide more verbose information.
+![image](https://user-images.githubusercontent.com/65014987/189569482-9ea0ccf3-39d1-4ecc-aa5f-d2c5e6b6c310.png)
 
-![image](https://user-images.githubusercontent.com/65014987/183884154-b94cf0bd-17d9-4eda-9f08-ea0ce254527f.png)
+## CI/CD with Github Actions
 
-## Dependency Injections
+A CI/CD pipeline is setup with Github Actions on this repository. The API is deployed to Azure App Service and published to Azure API Management. 
 
-Configuring application middleware can simplify the set up of the Web API and its dependencies through dependency injection. 
+![image](https://user-images.githubusercontent.com/65014987/189579402-97a137e0-aa59-4cc9-bb23-49ed88bda45f.png)
 
-Through using a separate 'injector' method to inject services into the components of the Web API application, we can simplify our code by removing the need to manually configure all dependencies in the application Program.cs and controller files.
+## Unit Testing
 
-For example, `builder.Services.AddControllers()`, will add the controller services into the web application and removes the need to manually configure and instantiate every individual controller. This will make the code more readable and also allow one to easily add and remove controllers.
+Unit testing are performed on the repository, service and API layers separately. Onion architecture assists with unit testing due to the low coupling between the layers, making bugs easier to identify. To generate mock data, an EF Core in memory database is constructed at the beginning of each test with sample data prepared. The data is initialised as such in: [DbTestSetup.cs](https://github.com/rl16432/msa-phase-3-backend/blob/main/msa-phase-3-backend.Testing/DbTestSetup.cs).
 
-Adding the middleware through `app.MapControllers()`, will map the identified controllers to the appropriate routes in one line.
+Mocks are also generated for the appsettings.json configuration and external HTTP client, in order to test consistently. Requests to the mock HTTP client for PokeAPI returns an object read from this [JSON](https://github.com/rl16432/msa-phase-3-backend/blob/main/msa-phase-3-backend.Testing/TestFiles/litten.json) file, simulating the API response.
 
-By extending the `ControllerBase` class to define the controllers, we allow the `AddControllers()` method to pick up on this dependency.
+Tests are performed for the main operations in the repository layer (get, create, update, delete), the services defined in the service layer and the controller methods (method returns the correct status result, duplicate usernames are prohibited...).
 
-### DI Example
+## FluentValidation/FluentAssertion
 
-![image](https://user-images.githubusercontent.com/65014987/183884182-6d172ba0-15eb-4c3c-bce8-f2bb9205b2da.png)
+All test cases performed in this application utilise **FluentAssertion**. 
 
-The program registers the `DbContext` dependency by adding the service to the `WebApplicationBuilder`'s services. 
+![image](https://user-images.githubusercontent.com/65014987/189625405-c6712221-11d2-4b6d-8c2b-088fd5565f63.png)
 
-![image](https://user-images.githubusercontent.com/65014987/183884261-eabace90-6536-43a7-b2f3-8a3ead463dd2.png)
+**FluentValidation** is also used to provide validation rules for the Trainer model. The username has to be between 3 and 20 characters, and the number of Pokemon for each trainer is capped at 6.
 
-The collection of services in the application when it is built, can then be injected into the `UserController` class. We can now interact with the database within our controllers through the `_context` field. This simplifies our code as we can access dependencies that we need straight from the dependencies defined in the application. The ASP.NET framework will be responsible for creating instances of the required dependency, and deleting it when it is no longer required.
+![image](https://user-images.githubusercontent.com/65014987/189623651-d7632750-2e7b-40de-84cf-1daa4ef1819a.png)
 
-## Testing
 
-### Using substitutes
-The NSubsitute library was used to create a **substitute** for the PokeApi return object. This is done by substituting the `HTTPClientFactory` and forcing the `CreateClient` method to return a '`fakeHttpClient`'. 
 
-```c#
-httpClientFactoryMock.CreateClient("pokeapi").Returns(fakeHttpClient);
-```
-
-This fake HttpClient will only return an OK response containing the serialised JSON object, read from `litten.json`, a file containing an example schema from PokeApi
-
-![image](https://user-images.githubusercontent.com/65014987/183884420-b7c619c9-0a33-4e3c-a2ab-42a4c12f6bda.png)
-
-This `litten.json`, has been set to always copy to the output directory, in `bin/Debug/net6.0` or otherwise, the test will be unable to find the file.
-
-![image](https://user-images.githubusercontent.com/65014987/183884448-b1ca85f4-4b1a-479e-b298-b6dd52b0a089.png)
-
-### How does middleware make code easier to test
-
-The application middleware through dependency injection will allow the controller I defined to take any parameters. Due to the application middleware, services such as the `DbContext`, `HttpClientFactory` are injected by .NET into the constructor of the controllers for use in the API, so that the controllers do not need to manually define its dependencies. 
-
-Therefore, when testing, we can pass in our own classes into the controller contrusctors for the purpose of testing, allowing testing to be easier to perform.
-
-We do not want to use a live database (for testing purposes), as in the Web API, but can define a `DbContext` in the testing `Setup()` function, such that we can test the controller locally. Through this, we can also get a fresh test database for each test, so that modifications to the database in one test will not affect another. The code for that is shown below.
-
-![image](https://user-images.githubusercontent.com/65014987/183884495-4cc6e88b-7673-4466-aa48-3676a97120c3.png)
-
-Additionally, if we were to configure the `HttpClient` inside our controller to point to PokeApi, without having it as middleware, then during testing we would still be calling the external API which is undesirable. Instead, we can create our own substitute for HTTPClient with NSubstitute as shown in the section above.
