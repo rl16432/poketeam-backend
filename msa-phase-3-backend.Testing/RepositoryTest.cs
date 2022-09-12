@@ -1,16 +1,14 @@
 using msa_phase_3_backend.Domain.Models;
-using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
-using msa_phase_3_backend.Repository.Data;
 using msa_phase_3_backend.Repository.Repository;
 
-namespace msa_phase_3_backend.testing
+namespace msa_phase_3_backend.Testing
 {
     [TestFixture]
     [Category("Repositories")]
     public class RepositoryTest
     {
-        private ApplicationDbContext appContext;
+        private DbTestSetup testSetup;
         private PokemonRepository pokemonRepository;
         private TrainerRepository trainerRepository;
 
@@ -24,22 +22,9 @@ namespace msa_phase_3_backend.testing
         [SetUp]
         public void Setup()
         {
-            // Use EF Core in memory database for testing. New database on every test
-            // Guid is virtually unique
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-
-            appContext = new ApplicationDbContext(options);
-
-            appContext.Trainers.Add(new Trainer { UserName = "Bianca" });
-            appContext.Trainers.Add(new Trainer { UserName = "Ralph" });
-            appContext.Trainers.Add(new Trainer { UserName = "Skyla" });
-            appContext.Trainers.Add(new Trainer { UserName = "Diamond" });
-            appContext.SaveChanges();
-
-            pokemonRepository = new PokemonRepository(appContext);
-            trainerRepository = new TrainerRepository(appContext);
+            testSetup = new DbTestSetup();
+            pokemonRepository = new PokemonRepository(testSetup.AppContext);
+            trainerRepository = new TrainerRepository(testSetup.AppContext);
         }
 
         [Test]
@@ -48,22 +33,24 @@ namespace msa_phase_3_backend.testing
             int userId = 1;
             var result = trainerRepository.Get(userId);
             result.Should().NotBeNull();
-            result.UserName.Should().BeEquivalentTo("Bianca");
+            result.UserName.Should().BeEquivalentTo(testSetup.UserNames[0]);
         }
 
         [Test]
         public void GetUserByUserName_GetsCorrectUser()
         {
-            string userName = "Skyla";
+            string userName = testSetup.UserNames[0];
             var result = trainerRepository.GetByUserName(userName);
+
             result.Should().NotBeNull();
-            result.UserName.Should().BeEquivalentTo("Skyla");
+            result.UserName.Should().BeEquivalentTo(userName);
+            result.Should().BeEquivalentTo(testSetup.AppContext.Trainers.Single(x => x.UserName == userName));
         }
 
         [Test]
         public void GetUserByUserName_ShouldBeCaseSensitive()
         {
-            string userName = "skyla";
+            string userName = testSetup.UserNames[0].ToLower() == testSetup.UserNames[0] ? testSetup.UserNames[0].ToUpper() : testSetup.UserNames[0].ToLower();
             var result = trainerRepository.GetByUserName(userName);
             result.Should().BeNull();
         }
@@ -71,11 +58,11 @@ namespace msa_phase_3_backend.testing
         [Test]
         public void GetNonExistentUsers_ReturnsNull()
         {
-            string userName = "Jack";
+            string userName = "nqaoiwdoiwoiqjw";
             var result = trainerRepository.GetByUserName(userName);
             result.Should().BeNull();
 
-            int userId = 20;
+            int userId = testSetup.UserNames.Count + 10;
             var result_2 = trainerRepository.Get(userId);
             result_2.Should().BeNull();
         }
@@ -86,36 +73,29 @@ namespace msa_phase_3_backend.testing
             var result = trainerRepository.GetAll();
 
             result.Should().NotBeNull();
-            result.Count().Should().Be(4);
+            result.Count().Should().Be(testSetup.UserNames.Count);
         }
 
         [Test]
-        public void DeleteById_RemovesUser()
+        public void DeleteUser_RemovesUser()
         {
-            var userId = 2;
-            var user = trainerRepository.Get(userId);
+            var userId = 1;
+            var user = testSetup.AppContext.Trainers.First(u => u.Id == userId);
 
             trainerRepository.Delete(user);
 
-            var result = trainerRepository.GetAll();
-
-            result.Should().NotBeNull();
-            result.Count().Should().Be(3);
-            // Check that the user has been removed
-            result.ToList().Select(x => x.Id).Should().NotContain(2);
+            testSetup.AppContext.Trainers.Count().Should().Be(testSetup.UserNames.Count - 1);
+            testSetup.AppContext.Trainers.Select(x => x.Id).Should().NotContain(userId);
         }
 
         [Test]
         public void InsertUser_AddsUser()
         {
-            var newUser = new Trainer { UserName = "Jack" };
+            var newUser = new Trainer { UserName = "qpweoqiwpeoi" };
             trainerRepository.Insert(newUser);
 
-            var result = trainerRepository.GetAll();
-
-            result.Should().NotBeNull();
-            result.Count().Should().Be(5);
-            result.ToList().Select(x => x.Id).Should().Contain(5);
+            testSetup.AppContext.Trainers.Count().Should().Be(testSetup.UserNames.Count + 1);
+            testSetup.AppContext.Trainers.Select(x => x.Id).Should().Contain(testSetup.UserNames.Count + 1);
         }
 
         [Test]
@@ -123,14 +103,14 @@ namespace msa_phase_3_backend.testing
         {
             int userId = 1;
             var result = trainerRepository.Get(userId);
+            var newUserName = "qpuwoim";
 
-            result.UserName = "Cheren";
+            result.UserName = newUserName;
             trainerRepository.Update(result);
 
-            var result_2 = trainerRepository.Get(userId);
-
-            result_2.Should().NotBeNull();
-            result_2.UserName.Should().BeEquivalentTo("Cheren");
+            testSetup.AppContext.Trainers.First(u => u.Id == userId).UserName
+                .Should().BeEquivalentTo(newUserName);
         }
+        
     }
 }

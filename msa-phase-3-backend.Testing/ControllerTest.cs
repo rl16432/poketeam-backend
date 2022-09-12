@@ -8,27 +8,21 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using msa_phase_3_backend.Repository.Data;
 using Microsoft.Extensions.Configuration;
 using msa_phase_3_backend.Repository.Repository;
 using msa_phase_3_backend.Services.CustomServices;
 using FluentAssertions;
-using System.Text.Json;
 
-namespace msa_phase_3_backend.testing
+namespace msa_phase_3_backend.Testing
 {
     [TestFixture]
     public class ControllerTest
     {
         private IHttpClientFactory httpClientFactoryMock;
-        private TrainerController controller;
         private TrainerValidator trainerValidator;
-        private ApplicationDbContext appContext;
-        private TrainerServices trainerService;
-        private PokemonServices pokemonService;
         private IConfiguration configuration;
-        private List<Pokemon> pokemonList;
-        private Trainer userWithPokemon;
+        private DbTestSetup testSetup;
+        private TrainerController controller;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -78,45 +72,12 @@ namespace msa_phase_3_backend.testing
         [SetUp]
         public void Setup()
         {
-            // Use EF Core in memory database for testing. New database on every test
-            // Guid is virtually unique
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
+            testSetup = new DbTestSetup(); 
+            var pokemonRepository = new PokemonRepository(testSetup.AppContext);
+            var userRepository = new TrainerRepository(testSetup.AppContext);
 
-            appContext = new ApplicationDbContext(options);
-
-            appContext.Trainers.Add(new Trainer { UserName = "Bianca" });
-            appContext.Trainers.Add(new Trainer { UserName = "Ralph" });
-            appContext.Trainers.Add(new Trainer { UserName = "Skyla" });
-            appContext.Trainers.Add(new Trainer { UserName = "Diamond" });
-            appContext.SaveChanges();
-
-            var pokemonRepository = new PokemonRepository(appContext);
-            var userRepository = new TrainerRepository(appContext);
-
-            trainerService = new TrainerServices(userRepository, pokemonRepository);
-            pokemonService = new PokemonServices(pokemonRepository);
-
-            // Read test Pokemon list from JSON
-            StreamReader r = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "TestFiles", "pokemon_list.json"));
-
-            string json = r.ReadToEnd();
-
-            pokemonList = JsonSerializer.Deserialize<List<Pokemon>>(json)!;
-
-            // User which we add Pokemon to for testing purposes
-            userWithPokemon = appContext.Trainers.FirstOrDefault(x => x.UserName.Equals("Diamond"))!;
-
-            // Add first 3 of the list to "Diamond" user for testing purposes
-            foreach (Pokemon pokemon in pokemonList!.GetRange(0, 3))
-            {
-                appContext.Pokemon.Add(pokemon);
-                userWithPokemon!.Pokemon.Add(pokemon);
-                appContext.Trainers.Update(userWithPokemon);
-            }
-
-            appContext.SaveChanges();
+            var trainerService = new TrainerServices(userRepository, pokemonRepository);
+            var pokemonService = new PokemonServices(pokemonRepository);
 
             // Set up mock logger
             var mockLogger = LoggerFactory.Create(config =>
@@ -131,7 +92,7 @@ namespace msa_phase_3_backend.testing
         [Test]
         public void GetUserByName_ReturnsOkObjectResult()
         {
-            string userName = "Skyla";
+            string userName = testSetup.UserNames[1];
             var result = controller.GetUser(userName);
 
             // Test that result is OkObjectResult
@@ -143,28 +104,28 @@ namespace msa_phase_3_backend.testing
         public void GetAllUsers_ReturnsOkObjectResult()
         {
             var result = controller.GetUsers();
-            Assert.That(result.Result, Is.InstanceOf<OkObjectResult>());
+            result.Result.Should().BeAssignableTo<OkObjectResult>();
         }
 
         [Test]
         public void GetAllUsers_ReturnsAllUsers()
         {
             var result = controller.GetUsers();
+
+            result.Result.Should().BeAssignableTo<OkObjectResult>();
             var typedResult = result.Result as OkObjectResult;
 
-            typedResult!.Value.Should().NotBeNull();
-            typedResult.Value.Should().BeAssignableTo<IEnumerable<Trainer>>();
-
+            typedResult!.Value.Should().BeAssignableTo<IEnumerable<Trainer>>();
             var typedValue = typedResult.Value as IEnumerable<Trainer>;
 
-            // The initial database should have 3 users
-            typedValue!.Count().Should().Be(4);
+            // Test the number of users in the database is correct
+            typedValue!.Count().Should().Be(testSetup.UserNames.Count);
         }
 
         [Test]
         public async Task CreateUser_ReturnsCreatedAtActionResult()
         {
-            var result = await controller.PostUser(new UserCreateDTO { UserName = "Volkner" });
+            var result = await controller.PostUser(new UserCreateDTO { UserName = "qwekjqwlk" });
 
             result.Result.Should().BeAssignableTo<CreatedAtActionResult>();
         }
@@ -172,17 +133,19 @@ namespace msa_phase_3_backend.testing
         [Test]
         public async Task CreateUser_ReturnsCreatedItem()
         {
-            var result = await controller.PostUser(new UserCreateDTO { UserName = "Cheren" });
+            var newUserName = "qlewkjq";
+            var result = await controller.PostUser(new UserCreateDTO { UserName = newUserName });
 
             var typedResult = result.Result as CreatedAtActionResult;
             var value = typedResult!.Value as Trainer;
 
             // UserName is correct
-            value!.UserName.Should().BeEquivalentTo("Cheren");
+            value!.UserName.Should().BeEquivalentTo(newUserName);
 
             // Pokemon List is initialised as empty
             value!.Pokemon.Should().BeAssignableTo<List<Pokemon>>();
             value!.Pokemon.Should().BeEmpty();
+
             // UserId is some integer
             value!.Id.Should().BeOfType(typeof(int));
         }
@@ -190,7 +153,8 @@ namespace msa_phase_3_backend.testing
         [Test]
         public async Task CreateUser_ShouldBeCaseSensitive()
         {
-            var result = await controller.PostUser(new UserCreateDTO { UserName = "bianca" });
+            var userName = testSetup.UserNames[0].ToLower() == testSetup.UserNames[0] ? testSetup.UserNames[0].ToUpper() : testSetup.UserNames[0].ToLower();
+            var result = await controller.PostUser(new UserCreateDTO { UserName = userName });
 
             result.Result.Should().NotBeAssignableTo<ConflictObjectResult>();
 
@@ -198,22 +162,23 @@ namespace msa_phase_3_backend.testing
             var value = typedResult!.Value as Trainer;
 
             // UserName is correct
-            value!.UserName.Should().Be("bianca");
+            value!.UserName.Should().BeEquivalentTo(userName);
 
-            appContext.Trainers.First(u => u.UserName == "bianca").UserName.Should().NotBe("Bianca");
+            // Check that there is only one match for the new username
+            testSetup.AppContext.Trainers.Where(u => u.UserName == userName).Count().Should().Be(1);
         }
         [Test]
         public async Task CreateDuplicateUser_IsNotAllowed()
         {
-            int originalCount = appContext.Trainers.Count();
-            var result = await controller.PostUser(new UserCreateDTO { UserName = "Cheren" });
+            int originalCount = testSetup.AppContext.Trainers.Count();
+            var result = await controller.PostUser(new UserCreateDTO { UserName = "qweoiqjw" });
 
-            var result_2 = await controller.PostUser(new UserCreateDTO { UserName = "Cheren" });
+            var result_2 = await controller.PostUser(new UserCreateDTO { UserName = "qweoiqjw" });
 
             // Check ConflictResult is returned
             result_2.Result.Should().BeAssignableTo<ConflictObjectResult>();
             // Check the number of Users only increases by 1
-            appContext.Trainers.Count().Should().Be(originalCount + 1);
+            testSetup.AppContext.Trainers.Count().Should().Be(originalCount + 1);
         }
 
         [Test]
@@ -227,12 +192,12 @@ namespace msa_phase_3_backend.testing
         [Test]
         public async Task AddPokemonToUser_AddsPokemonToUser()
         {
-            int userId = 2;
+            int userId = 1;
 
             var result = await controller.AddPokemonToUser(userId, "litten");
 
             // Get user after Pokemon is added
-            var updatedUser = await appContext.Trainers.FirstOrDefaultAsync(u => u.Id == userId);
+            var updatedUser = await testSetup.AppContext.Trainers.FirstOrDefaultAsync(u => u.Id == userId);
 
             updatedUser.Should().NotBeNull();
             // Count of Pokemon under user should be 1
@@ -243,7 +208,7 @@ namespace msa_phase_3_backend.testing
         [Test]
         public async Task AddPokemonToUser_DoesNotAddDuplicate()
         {
-            int userId = 2;
+            int userId = 1;
 
             await controller.AddPokemonToUser(userId, "litten");
 
@@ -251,7 +216,7 @@ namespace msa_phase_3_backend.testing
             var result = await controller.AddPokemonToUser(userId, "litten");
 
             // Get user after Pokemon is added
-            var updatedUser = await appContext.Trainers.FirstOrDefaultAsync(u => u.Id == userId);
+            var updatedUser = await testSetup.AppContext.Trainers.FirstOrDefaultAsync(u => u.Id == userId);
 
             updatedUser.Should().NotBeNull();
             // Count of Pokemon under user should be 1
@@ -262,37 +227,35 @@ namespace msa_phase_3_backend.testing
         public async Task AddPokemonToUser_LimitsToSixPokemon()
         {
             int userId = 1;
-            var userToAdd = appContext.Trainers.First(u => u.Id == userId);
+            var userToAdd = testSetup.AppContext.Trainers.First(u => u.Id == userId);
 
             // Read Pokemon from JSON
-            StreamReader r = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "TestFiles", "pokemon_list.json"));
 
-            string json = r.ReadToEnd();
-
-            var tempList = JsonSerializer.Deserialize<List<Pokemon>>(json)!;
-
+            var pokemonList = testSetup.getPokemonListFromJson("pokemon_list.json");
             // Add 6 Pokemon to the user with ID: 1
-            foreach (Pokemon pokemon in tempList.GetRange(0, 6))
+            foreach (Pokemon pokemon in pokemonList.GetRange(0, 6))
             {
-                appContext.Pokemon.Add(pokemon);
+                testSetup.AppContext.Pokemon.Add(pokemon);
                 userToAdd.Pokemon.Add(pokemon);
-                appContext.Trainers.Update(userToAdd);
+                testSetup.AppContext.Trainers.Update(userToAdd);
             }
-            await appContext.SaveChangesAsync();
+            await testSetup.AppContext.SaveChangesAsync();
 
             // Attempt to add another
             var result = await controller.AddPokemonToUser(userId, "litten");
 
-            Trainer updatedUser = appContext.Trainers.First(u => u.Id == userId);
+            Trainer updatedUser = testSetup.AppContext.Trainers.First(u => u.Id == userId);
+            
             // Check there is a bad request
             result.Result.Should().BeAssignableTo<BadRequestObjectResult>();
+            // Check the number of pokemon is still 6
             updatedUser.Pokemon.Count.Should().Be(6);
         }
 
         [Test]
         public void DeletePokemonFromUser_ReturnsOkResult()
         {
-            var result = controller.DeletePokemonFromUser(userWithPokemon.Id, pokemonList[1].Name);
+            var result = controller.DeletePokemonFromUser(testSetup.UserWithPokemon.Id, testSetup.AddedPokemonList[0].Name);
 
             result.Should().BeAssignableTo<OkResult>();
         }
@@ -300,19 +263,19 @@ namespace msa_phase_3_backend.testing
         [Test]
         public void DeletePokemonFromUser_RemovesCorrectPokemon()
         {
-            var originalPokemonCount = userWithPokemon.Pokemon.Count;
-            var result = controller.DeletePokemonFromUser(userWithPokemon.Id, pokemonList[1].Name);
+            var originalPokemonCount = testSetup.UserWithPokemon.Pokemon.Count;
+            var result = controller.DeletePokemonFromUser(testSetup.UserWithPokemon.Id, testSetup.AddedPokemonList[1].Name);
 
-            var newUserWithPokemon = appContext.Trainers.First(u => u.Id == userWithPokemon.Id);
+            var newUserWithPokemon = testSetup.AppContext.Trainers.First(u => u.Id == testSetup.UserWithPokemon.Id);
 
             newUserWithPokemon.Pokemon.Count.Should().Be(originalPokemonCount - 1);
-            newUserWithPokemon.Pokemon.Select(x => x.Name).Should().NotContainEquivalentOf(pokemonList[1].Name);
+            newUserWithPokemon.Pokemon.Select(x => x.Name).Should().NotContainEquivalentOf(testSetup.AddedPokemonList[1].Name);
         }
 
         [Test]
         public void DeletePokemonFromInvalidUser_ReturnsNotFoundResult()
         {
-            var result = controller.DeletePokemonFromUser(20, pokemonList[1].Name!);
+            var result = controller.DeletePokemonFromUser(20, testSetup.AddedPokemonList[0].Name);
 
             result.Should().BeAssignableTo<NotFoundObjectResult>();
         }
