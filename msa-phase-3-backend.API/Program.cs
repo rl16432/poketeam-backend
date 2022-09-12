@@ -1,13 +1,13 @@
-using System.Reflection;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using msa_phase_3_backend.Domain.Models;
 using msa_phase_3_backend.Repository.Data;
-using Microsoft.EntityFrameworkCore;
+using msa_phase_3_backend.Repository.IRepository;
+using msa_phase_3_backend.Repository.Repository;
 using msa_phase_3_backend.Services;
 using msa_phase_3_backend.Services.CustomServices;
-using msa_phase_3_backend.Repository.Repository;
-using FluentValidation;
-using msa_phase_3_backend.Repository.IRepository;
 using msa_phase_3_backend.Services.ICustomServices;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,17 +1,17 @@
-﻿using msa_phase_3_backend.Domain.Models;
-using msa_phase_3_backend.Domain.Models.DTO;
-using msa_phase_3_backend.API.Controllers;
+﻿using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
+using msa_phase_3_backend.API.Controllers;
+using msa_phase_3_backend.Domain.Models;
+using msa_phase_3_backend.Domain.Models.DTO;
+using msa_phase_3_backend.Repository.Repository;
+using msa_phase_3_backend.Services.CustomServices;
 using NSubstitute;
 using System.Net;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using msa_phase_3_backend.Repository.Repository;
-using msa_phase_3_backend.Services.CustomServices;
-using FluentAssertions;
 
 namespace msa_phase_3_backend.Testing
 {
@@ -112,11 +112,8 @@ namespace msa_phase_3_backend.Testing
         {
             var result = controller.GetUsers();
 
-            result.Result.Should().BeAssignableTo<OkObjectResult>();
             var typedResult = result.Result as OkObjectResult;
-
-            typedResult!.Value.Should().BeAssignableTo<IEnumerable<Trainer>>();
-            var typedValue = typedResult.Value as IEnumerable<Trainer>;
+            var typedValue = typedResult!.Value as IEnumerable<Trainer>;
 
             // Test the number of users in the database is correct
             typedValue!.Count().Should().Be(testSetup.UserNames.Count);
@@ -190,7 +187,7 @@ namespace msa_phase_3_backend.Testing
         }
 
         [Test]
-        public async Task AddPokemonToUser_AddsPokemonToUser()
+        public async Task AddPokemonToUser_AddsPokemonToUserCollection()
         {
             int userId = 1;
 
@@ -200,7 +197,8 @@ namespace msa_phase_3_backend.Testing
             var updatedUser = await testSetup.AppContext.Trainers.FirstOrDefaultAsync(u => u.Id == userId);
 
             updatedUser.Should().NotBeNull();
-            // Count of Pokemon under user should be 1
+
+            // Check count 
             updatedUser!.Pokemon.Count.Should().Be(1);
             updatedUser.Pokemon.First().Name.Should().BeEquivalentTo("Litten");
         }

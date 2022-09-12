@@ -1,7 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FluentValidation;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
-using FluentValidation;
 
 namespace msa_phase_3_backend.Domain.Models;
 
@@ -29,9 +28,8 @@ public class TrainerValidator : AbstractValidator<Trainer>
     public TrainerValidator()
     {
         // Username between 5 and 20 characters
-        RuleFor(x => x.UserName).NotEmpty().WithMessage("Username is required").Length(5, 20);
-        RuleFor(x => x.Pokemon).NotNull();
-        RuleFor(x => x.Pokemon).Must(x => x!.Count <= 6).WithMessage("Trainer already has 6 Pokemon");
+        RuleFor(x => x.UserName).NotEmpty().WithMessage("Username is required").Length(3, 20);
+        RuleFor(x => x.Pokemon).NotNull().Must(x => x.Count <= 6).WithMessage("Trainer already has 6 Pokemon");
     }
 }
 

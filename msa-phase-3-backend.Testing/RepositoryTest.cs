@@ -1,5 +1,5 @@
-using msa_phase_3_backend.Domain.Models;
 using FluentAssertions;
+using msa_phase_3_backend.Domain.Models;
 using msa_phase_3_backend.Repository.Repository;
 
 namespace msa_phase_3_backend.Testing

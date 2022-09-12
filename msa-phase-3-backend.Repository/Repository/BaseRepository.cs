@@ -1,7 +1,6 @@
-﻿using msa_phase_3_backend.Domain.Models;
-using msa_phase_3_backend.Repository.Extensions;
+﻿using Microsoft.EntityFrameworkCore;
+using msa_phase_3_backend.Domain.Models;
 using msa_phase_3_backend.Repository.Data;
-using Microsoft.EntityFrameworkCore;
 using msa_phase_3_backend.Repository.IRepository;
 
 namespace msa_phase_3_backend.Repository.Repository

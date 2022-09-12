@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using msa_phase_3_backend.Domain.Models;
 using msa_phase_3_backend.Domain.Models.DTO;
-using System.Text.Json;
-using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
-using FluentValidation;
 using msa_phase_3_backend.Services.ICustomServices;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace msa_phase_3_backend.API.Controllers;
 

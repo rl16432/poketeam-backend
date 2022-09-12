@@ -1,10 +1,7 @@
-using msa_phase_3_backend.Domain.Models;
-using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
-using msa_phase_3_backend.Repository.Data;
-using msa_phase_3_backend.Services.CustomServices;
+using msa_phase_3_backend.Domain.Models;
 using msa_phase_3_backend.Repository.Repository;
-using System.Text.Json;
+using msa_phase_3_backend.Services.CustomServices;
 
 namespace msa_phase_3_backend.Testing
 {
@@ -162,7 +159,6 @@ namespace msa_phase_3_backend.Testing
             // Check the Pokemon DbSet contains the new pokemon
             testSetup.AppContext.Pokemon.Count().Should().Be(originalCount + 1);
             testSetup.AppContext.Pokemon.Should().Contain(pokemon);
-
 
             testSetup.AppContext.Trainers.First(user => user.UserName.Equals(userToAddTo.UserName)).Pokemon.Count
                 .Should().Be(userPokemonCount + 1);
