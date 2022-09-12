@@ -13,6 +13,12 @@ public class UserContext : DbContext
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<User>().Property(u => u.UserName)
+            .UseCollation("SQL_Latin1_General_CP1_CS_AS");
+
+        builder.Entity<Pokemon>().Property(a => a.Name)
+           .UseCollation("SQL_Latin1_General_CP1_CI_AS");
+
         builder.Entity<User>()
             .HasIndex(u => u.UserName)
             .IsUnique();

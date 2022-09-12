@@ -13,15 +13,15 @@ namespace msa_phase_3_backend.Repository.Repository
         }
         public override User Get(int userId)
         {
-            return entities.IncludeMultiple(user => user.Pokemon!).SingleOrDefault(user => user.Id == userId)!;
+            return entities.IncludeMultiple(user => user.Pokemon).SingleOrDefault(user => user.Id == userId)!;
         }
         public User GetByUserName(string userName)
         {
-            return entities.IncludeMultiple(user => user.Pokemon!).SingleOrDefault(user => user.UserName == userName)!;
+            return entities.IncludeMultiple(user => user.Pokemon).SingleOrDefault(user => user.UserName == userName)!;
         }
         public override IEnumerable<User> GetAll()
         {
-            return entities.IncludeMultiple(user => user.Pokemon!).AsEnumerable();
+            return entities.IncludeMultiple(user => user.Pokemon).AsEnumerable();
         }
 
         public void DeleteById(int userId)

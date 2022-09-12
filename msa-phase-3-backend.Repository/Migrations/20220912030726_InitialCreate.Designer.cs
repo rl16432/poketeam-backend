@@ -12,8 +12,8 @@ using msa_phase_3_backend.Repository.Data;
 namespace msa_phase_3_backend.Repository.Migrations
 {
     [DbContext(typeof(UserContext))]
-    [Migration("20220910231041_UpdateModel")]
-    partial class UpdateModel
+    [Migration("20220912030726_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -47,7 +47,8 @@ namespace msa_phase_3_backend.Repository.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.Property<int>("PokemonNo")
                         .HasColumnType("int");
@@ -81,7 +82,8 @@ namespace msa_phase_3_backend.Repository.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .UseCollation("SQL_Latin1_General_CP1_CS_AS");
 
                     b.HasKey("Id");
 

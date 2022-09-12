@@ -48,6 +48,7 @@ namespace msa_phase_3_backend.testing
                 // Return the litten.json stringified
                 Content = new StringContent(json, Encoding.UTF8, "application/json")
             });
+
             var fakeHttpClient = new HttpClient(fakeHttpMessageHandler)
             {
                 // Set base address to avoid invalid Uri
@@ -71,8 +72,6 @@ namespace msa_phase_3_backend.testing
 
             // Initialise FluentValiator
             userValidator = new UserValidator();
-
-
         }
 
         // Set up after every test
@@ -109,8 +108,8 @@ namespace msa_phase_3_backend.testing
             // User which we add Pokemon to for testing purposes
             userWithPokemon = userContext.Users.FirstOrDefault(x => x.UserName.Equals("Diamond"))!;
 
-            // Add first half of the list to "Diamond" user for testing purposes
-            foreach (Pokemon pokemon in pokemonList!.GetRange(0, pokemonList.Count / 2))
+            // Add first 3 of the list to "Diamond" user for testing purposes
+            foreach (Pokemon pokemon in pokemonList!.GetRange(0, 3))
             {
                 userContext.Pokemon.Add(pokemon);
                 userWithPokemon!.Pokemon.Add(pokemon);
@@ -189,6 +188,21 @@ namespace msa_phase_3_backend.testing
         }
 
         [Test]
+        public async Task CreateUser_ShouldBeCaseSensitive()
+        {
+            var result = await controller.PostUser(new UserCreateDTO { UserName = "bianca" });
+
+            result.Result.Should().NotBeAssignableTo<ConflictObjectResult>();
+
+            var typedResult = result.Result as CreatedAtActionResult;
+            var value = typedResult!.Value as User;
+
+            // UserName is correct
+            value!.UserName.Should().Be("bianca");
+
+            userContext.Users.First(u => u.UserName == "bianca").UserName.Should().NotBe("Bianca");
+        }
+        [Test]
         public async Task CreateDuplicateUser_IsNotAllowed()
         {
             int originalCount = userContext.Users.Count();
@@ -244,25 +258,33 @@ namespace msa_phase_3_backend.testing
             updatedUser!.Pokemon.Count.Should().Be(1);
             updatedUser.Pokemon.First().Name.Should().BeEquivalentTo("Litten");
         }
-
+        [Test]
         public async Task AddPokemonToUser_LimitsToSixPokemon()
         {
             int userId = 1;
             var userToAdd = userContext.Users.First(u => u.Id == userId);
 
-            foreach (Pokemon pokemon in pokemonList.GetRange(0, pokemonList.Count / 2))
+            // Read Pokemon from JSON
+            StreamReader r = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "TestFiles", "pokemon_list.json"));
+
+            string json = r.ReadToEnd();
+
+            var tempList = JsonSerializer.Deserialize<List<Pokemon>>(json)!;
+
+            // Add 6 Pokemon to the user with ID: 1
+            foreach (Pokemon pokemon in tempList.GetRange(0, 6))
             {
                 userContext.Pokemon.Add(pokemon);
                 userToAdd.Pokemon.Add(pokemon);
                 userContext.Users.Update(userToAdd);
             }
-
             await userContext.SaveChangesAsync();
 
+            // Attempt to add another
             var result = await controller.AddPokemonToUser(userId, "litten");
 
             User updatedUser = userContext.Users.First(u => u.Id == userId);
-
+            // Check there is a bad request
             result.Result.Should().BeAssignableTo<BadRequestObjectResult>();
             updatedUser.Pokemon.Count.Should().Be(6);
         }
@@ -270,7 +292,7 @@ namespace msa_phase_3_backend.testing
         [Test]
         public void DeletePokemonFromUser_ReturnsOkResult()
         {
-            var result = controller.DeletePokemonFromUser(userWithPokemon.Id, pokemonList[1].Name!);
+            var result = controller.DeletePokemonFromUser(userWithPokemon.Id, pokemonList[1].Name);
 
             result.Should().BeAssignableTo<OkResult>();
         }
@@ -279,7 +301,7 @@ namespace msa_phase_3_backend.testing
         public void DeletePokemonFromUser_RemovesCorrectPokemon()
         {
             var originalPokemonCount = userWithPokemon.Pokemon.Count;
-            var result = controller.DeletePokemonFromUser(userWithPokemon.Id, pokemonList[1].Name!);
+            var result = controller.DeletePokemonFromUser(userWithPokemon.Id, pokemonList[1].Name);
 
             var newUserWithPokemon = userContext.Users.First(u => u.Id == userWithPokemon.Id);
 

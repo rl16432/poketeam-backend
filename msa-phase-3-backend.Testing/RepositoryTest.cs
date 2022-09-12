@@ -56,6 +56,7 @@ namespace msa_phase_3_backend.testing
             result.Should().NotBeNull();
             result.UserName.Should().BeEquivalentTo("Bianca");
         }
+
         [Test]
         public void GetUserByUserName_GetsCorrectUser()
         {
@@ -64,6 +65,15 @@ namespace msa_phase_3_backend.testing
             result.Should().NotBeNull();
             result.UserName.Should().BeEquivalentTo("Skyla");
         }
+
+        [Test]
+        public void GetUserByUserName_ShouldBeCaseSensitive()
+        {
+            string userName = "skyla";
+            var result = userRepository.GetByUserName(userName);
+            result.Should().BeNull();
+        }
+
         [Test]
         public void GetNonExistentUsers_ReturnsNull()
         {
@@ -75,6 +85,7 @@ namespace msa_phase_3_backend.testing
             var result_2 = userRepository.Get(userId);
             result_2.Should().BeNull();
         }
+
         [Test]
         public void GetAllUsers_GetsAllUsers()
         {

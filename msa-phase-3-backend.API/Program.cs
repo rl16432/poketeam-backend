@@ -48,6 +48,7 @@ builder.Services.AddScoped<PokemonRepository>();
 builder.Services.AddScoped<UserServices>();
 builder.Services.AddScoped<PokemonServices>();
 
+// Add Fluent Validator
 builder.Services.AddScoped<IValidator<User>, UserValidator>();
 
 // Add CORS

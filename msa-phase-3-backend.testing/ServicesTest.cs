@@ -92,6 +92,13 @@ namespace msa_phase_3_backend.testing
             result.UserName.Should().BeEquivalentTo("Skyla");
         }
         [Test]
+        public void GetUserByUserName_ShouldBeCaseSensitive()
+        {
+            string userName = "skyla";
+            var result = userService.GetByUserName(userName);
+            result.Should().BeNull();
+        }
+        [Test]
         public void GetNonExistentUser_ReturnsNull()
         {
             string userName = "Jack";
