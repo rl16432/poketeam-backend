@@ -3,32 +3,26 @@ using msa_phase_3_backend.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using msa_phase_3_backend.Repository.Data;
 using msa_phase_3_backend.Repository.Extensions;
+using msa_phase_3_backend.Repository.IRepository;
 
 namespace msa_phase_3_backend.Repository.Repository
 {
-    public class UserRepository : BaseRepository<User>
+    public class TrainerRepository : BaseRepository<Trainer>, IUserRepository<Trainer>
     {
-        public UserRepository(UserContext userContext) : base(userContext)
+        public TrainerRepository(ApplicationDbContext appContext) : base(appContext)
         {
         }
-        public override User Get(int userId)
+        public override Trainer Get(int userId)
         {
             return entities.IncludeMultiple(user => user.Pokemon).SingleOrDefault(user => user.Id == userId)!;
         }
-        public User GetByUserName(string userName)
+        public Trainer GetByUserName(string userName)
         {
             return entities.IncludeMultiple(user => user.Pokemon).SingleOrDefault(user => user.UserName == userName)!;
         }
-        public override IEnumerable<User> GetAll()
+        public override IEnumerable<Trainer> GetAll()
         {
             return entities.IncludeMultiple(user => user.Pokemon).AsEnumerable();
-        }
-
-        public void DeleteById(int userId)
-        {
-            var user = entities.IncludeMultiple(user => user.Pokemon!).SingleOrDefault(user => user.Id == userId);
-            entities.Remove(user!);
-            _userContext.SaveChanges();
         }
     }
 }

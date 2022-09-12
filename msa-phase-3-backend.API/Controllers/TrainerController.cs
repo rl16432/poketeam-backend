@@ -7,22 +7,23 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using msa_phase_3_backend.Services.CustomServices;
 using FluentValidation;
+using msa_phase_3_backend.Services.ICustomServices;
 
 namespace msa_phase_3_backend.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UserController : ControllerBase
+public class TrainerController : ControllerBase
 {
     private readonly HttpClient _client;
-    private readonly ILogger<UserController> _logger;
+    private readonly ILogger<TrainerController> _logger;
     private readonly IConfiguration _configuration;
-    private readonly IValidator<User> _userValidator;
-    private readonly PokemonServices _pokemonService;
-    private readonly UserServices _userService;
+    private readonly IValidator<Trainer> _trainerValidator;
+    private readonly ICustomService<Pokemon> _pokemonService;
+    private readonly IUserCustomService<Trainer> _trainerService;
 
-    public UserController(ILogger<UserController> logger, IHttpClientFactory clientFactory, IConfiguration configuration,
-        UserServices userService, PokemonServices pokemonService, IValidator<User> userValidator)
+    public TrainerController(ILogger<TrainerController> logger, IHttpClientFactory clientFactory, IConfiguration configuration,
+        IUserCustomService<Trainer> userService, ICustomService<Pokemon> pokemonService, IValidator<Trainer> userValidator)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -32,9 +33,9 @@ public class UserController : ControllerBase
         }
         _client = clientFactory.CreateClient("pokeapi");
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        _userValidator = userValidator ?? throw new ArgumentNullException(nameof(userValidator));
+        _trainerValidator = userValidator ?? throw new ArgumentNullException(nameof(userValidator));
         _pokemonService = pokemonService ?? throw new ArgumentNullException(nameof(pokemonService));
-        _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+        _trainerService = userService ?? throw new ArgumentNullException(nameof(userService));
     }
 
     /// <summary>
@@ -42,9 +43,9 @@ public class UserController : ControllerBase
     /// </summary>
     /// <returns>A response with the list of users</returns>
     [HttpGet]
-    public ActionResult<IEnumerable<User>> GetUsers()
+    public ActionResult<IEnumerable<Trainer>> GetUsers()
     {
-        var users = _userService.GetAll();
+        var users = _trainerService.GetAll();
         return Ok(users);
     }
 
@@ -54,9 +55,9 @@ public class UserController : ControllerBase
     /// <param name="userName">The user name of the user to return</param>
     /// <returns>The user with that user name, or a 404 response if the user does not exist</returns>
     [HttpGet("{userName}")]
-    public ActionResult<User> GetUser(string userName)
+    public ActionResult<Trainer> GetUser(string userName)
     {
-        var user = _userService.GetByUserName(userName);
+        var user = _trainerService.GetByUserName(userName);
 
         if (user == null)
         {
@@ -73,22 +74,22 @@ public class UserController : ControllerBase
     /// <returns>A 201 success code if the user has been created, along with the new user</returns>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<ActionResult<User>> PostUser(UserCreateDTO userCreateDto)
+    public async Task<ActionResult<Trainer>> PostUser(UserCreateDTO userCreateDto)
     {
-        var userExists = _userService.GetByUserName(userCreateDto.UserName);
+        var userExists = _trainerService.GetByUserName(userCreateDto.UserName);
         if (userExists != null)
         {
             return Conflict("Username already exists");
         }
-        var user = new User { UserName = userCreateDto.UserName, Pokemon = new List<Pokemon>() };
+        var user = new Trainer { UserName = userCreateDto.UserName, Pokemon = new List<Pokemon>() };
 
         // FluentValidation to check the user name is valid
-        FluentValidation.Results.ValidationResult result = await _userValidator.ValidateAsync(user);
+        FluentValidation.Results.ValidationResult result = await _trainerValidator.ValidateAsync(user);
         if (!result.IsValid)
         {
             return BadRequest(result.Errors.Select(err => err.ErrorMessage));
         }
-        _userService.Insert(user);
+        _trainerService.Insert(user);
 
         return CreatedAtAction(nameof(PostUser), new { userId = user.Id, userName = user.UserName }, user);
     }
@@ -101,7 +102,7 @@ public class UserController : ControllerBase
     [HttpDelete("{userId}")]
     public IActionResult DeleteUser(int userId)
     {
-        _userService.DeleteById(userId);
+        _trainerService.DeleteById(userId);
 
         return Ok();
     }
@@ -114,19 +115,19 @@ public class UserController : ControllerBase
     /// <returns>A 204 No Content Response</returns>
     [HttpPut("{userId}/Pokemon")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<ActionResult<User>> AddPokemonToUser(int userId, [Required] string pokemon)
+    public async Task<ActionResult<Trainer>> AddPokemonToUser(int userId, [Required] string pokemon)
     {
         // Find user by ID
-        var user = _userService.Get(userId);
+        var user = _trainerService.Get(userId);
 
         if (user == null)
         {
-            return NotFound("User does not exist");
+            return NotFound("Trainer does not exist");
         }
 
         if (user.Pokemon.Count >= 6)
         {
-            return BadRequest("User already has 6 Pokemon");
+            return BadRequest("Trainer already has 6 Pokemon");
         }
 
         // Call on PokeApi
@@ -174,7 +175,7 @@ public class UserController : ControllerBase
         // Link new Pokemon to user
         user.Pokemon.Add(newPokemon);
 
-        _userService.Update(user);
+        _trainerService.Update(user);
 
         return NoContent();
     }
@@ -189,11 +190,11 @@ public class UserController : ControllerBase
     public IActionResult DeletePokemonFromUser(int userId, [Required] string pokemon)
     {
         // Find user by ID
-        var user = _userService.Get(userId);
+        var user = _trainerService.Get(userId);
 
         if (user == null)
         {
-            return NotFound("User does not exist");
+            return NotFound("Trainer does not exist");
         }
         else if (user.Pokemon == null || user.Pokemon.Count == 0)
         {
@@ -207,7 +208,7 @@ public class UserController : ControllerBase
             {
                 user.Pokemon!.Remove(pokemonObj);
                 _pokemonService.Delete(pokemonObj);
-                _userService.Update(user);
+                _trainerService.Update(user);
             }
         }
         return Ok();

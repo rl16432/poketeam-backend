@@ -1,13 +1,7 @@
 using msa_phase_3_backend.Domain.Models;
-using msa_phase_3_backend.Domain.Models.DTO;
-using msa_phase_3_backend.API.Controllers;
-using NSubstitute;
-using System.Net;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
 using msa_phase_3_backend.Repository.Data;
-using msa_phase_3_backend.Services.CustomServices;
 using msa_phase_3_backend.Repository.Repository;
 
 namespace msa_phase_3_backend.testing
@@ -16,9 +10,9 @@ namespace msa_phase_3_backend.testing
     [Category("Repositories")]
     public class RepositoryTest
     {
-        private UserContext userContext;
+        private ApplicationDbContext appContext;
         private PokemonRepository pokemonRepository;
-        private UserRepository userRepository;
+        private TrainerRepository trainerRepository;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -32,27 +26,27 @@ namespace msa_phase_3_backend.testing
         {
             // Use EF Core in memory database for testing. New database on every test
             // Guid is virtually unique
-            var options = new DbContextOptionsBuilder<UserContext>()
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            userContext = new UserContext(options);
+            appContext = new ApplicationDbContext(options);
 
-            userContext.Users.Add(new User { UserName = "Bianca" });
-            userContext.Users.Add(new User { UserName = "Ralph" });
-            userContext.Users.Add(new User { UserName = "Skyla" });
-            userContext.Users.Add(new User { UserName = "Diamond" });
-            userContext.SaveChanges();
+            appContext.Trainers.Add(new Trainer { UserName = "Bianca" });
+            appContext.Trainers.Add(new Trainer { UserName = "Ralph" });
+            appContext.Trainers.Add(new Trainer { UserName = "Skyla" });
+            appContext.Trainers.Add(new Trainer { UserName = "Diamond" });
+            appContext.SaveChanges();
 
-            pokemonRepository = new PokemonRepository(userContext);
-            userRepository = new UserRepository(userContext);
+            pokemonRepository = new PokemonRepository(appContext);
+            trainerRepository = new TrainerRepository(appContext);
         }
 
         [Test]
         public void GetUserById_GetsCorrectUserName()
         {
             int userId = 1;
-            var result = userRepository.Get(userId);
+            var result = trainerRepository.Get(userId);
             result.Should().NotBeNull();
             result.UserName.Should().BeEquivalentTo("Bianca");
         }
@@ -61,7 +55,7 @@ namespace msa_phase_3_backend.testing
         public void GetUserByUserName_GetsCorrectUser()
         {
             string userName = "Skyla";
-            var result = userRepository.GetByUserName(userName);
+            var result = trainerRepository.GetByUserName(userName);
             result.Should().NotBeNull();
             result.UserName.Should().BeEquivalentTo("Skyla");
         }
@@ -70,7 +64,7 @@ namespace msa_phase_3_backend.testing
         public void GetUserByUserName_ShouldBeCaseSensitive()
         {
             string userName = "skyla";
-            var result = userRepository.GetByUserName(userName);
+            var result = trainerRepository.GetByUserName(userName);
             result.Should().BeNull();
         }
 
@@ -78,18 +72,18 @@ namespace msa_phase_3_backend.testing
         public void GetNonExistentUsers_ReturnsNull()
         {
             string userName = "Jack";
-            var result = userRepository.GetByUserName(userName);
+            var result = trainerRepository.GetByUserName(userName);
             result.Should().BeNull();
 
             int userId = 20;
-            var result_2 = userRepository.Get(userId);
+            var result_2 = trainerRepository.Get(userId);
             result_2.Should().BeNull();
         }
 
         [Test]
         public void GetAllUsers_GetsAllUsers()
         {
-            var result = userRepository.GetAll();
+            var result = trainerRepository.GetAll();
 
             result.Should().NotBeNull();
             result.Count().Should().Be(4);
@@ -99,9 +93,11 @@ namespace msa_phase_3_backend.testing
         public void DeleteById_RemovesUser()
         {
             var userId = 2;
-            userRepository.DeleteById(userId);
+            var user = trainerRepository.Get(userId);
 
-            var result = userRepository.GetAll();
+            trainerRepository.Delete(user);
+
+            var result = trainerRepository.GetAll();
 
             result.Should().NotBeNull();
             result.Count().Should().Be(3);
@@ -112,10 +108,10 @@ namespace msa_phase_3_backend.testing
         [Test]
         public void InsertUser_AddsUser()
         {
-            var newUser = new User { UserName = "Jack" };
-            userRepository.Insert(newUser);
+            var newUser = new Trainer { UserName = "Jack" };
+            trainerRepository.Insert(newUser);
 
-            var result = userRepository.GetAll();
+            var result = trainerRepository.GetAll();
 
             result.Should().NotBeNull();
             result.Count().Should().Be(5);
@@ -126,12 +122,12 @@ namespace msa_phase_3_backend.testing
         public void UpdateUser_UpdatesUser()
         {
             int userId = 1;
-            var result = userRepository.Get(userId);
+            var result = trainerRepository.Get(userId);
 
             result.UserName = "Cheren";
-            userRepository.Update(result);
+            trainerRepository.Update(result);
 
-            var result_2 = userRepository.Get(userId);
+            var result_2 = trainerRepository.Get(userId);
 
             result_2.Should().NotBeNull();
             result_2.UserName.Should().BeEquivalentTo("Cheren");

@@ -1,9 +1,4 @@
 using msa_phase_3_backend.Domain.Models;
-using msa_phase_3_backend.Domain.Models.DTO;
-using msa_phase_3_backend.API.Controllers;
-using NSubstitute;
-using System.Net;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
 using msa_phase_3_backend.Repository.Data;
@@ -14,14 +9,14 @@ using System.Text.Json;
 namespace msa_phase_3_backend.testing
 {
     [TestFixture]
-    [Category("UserServices")]
+    [Category("TrainerServices")]
     public class ServicesTests
     {
-        private UserServices userService;
+        private TrainerServices trainerService;
         private PokemonServices pokemonService;
-        private UserContext userContext;
+        private ApplicationDbContext appContext;
         private PokemonRepository pokemonRepository;
-        private UserRepository userRepository;
+        private TrainerRepository trainerRepository;
         private List<Pokemon> pokemonList;
 
         [OneTimeSetUp]
@@ -36,18 +31,18 @@ namespace msa_phase_3_backend.testing
         {
             // Use EF Core in memory database for testing. New database on every test
             // Guid is virtually unique
-            var options = new DbContextOptionsBuilder<UserContext>()
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .EnableSensitiveDataLogging()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            userContext = new UserContext(options);
+            appContext = new ApplicationDbContext(options);
 
-            userContext.Users.Add(new User { UserName = "Bianca" });
-            userContext.Users.Add(new User { UserName = "Ralph" });
-            userContext.Users.Add(new User { UserName = "Skyla" });
-            userContext.Users.Add(new User { UserName = "Diamond" });
-            userContext.SaveChanges();
+            appContext.Trainers.Add(new Trainer { UserName = "Bianca" });
+            appContext.Trainers.Add(new Trainer { UserName = "Ralph" });
+            appContext.Trainers.Add(new Trainer { UserName = "Skyla" });
+            appContext.Trainers.Add(new Trainer { UserName = "Diamond" });
+            appContext.SaveChanges();
 
             // Read test Pokemon list from JSON
             StreamReader r = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "TestFiles", "pokemon_list.json"));
@@ -59,19 +54,19 @@ namespace msa_phase_3_backend.testing
             // Add first half of the list to "Diamond" user for testing purposes
             foreach (Pokemon pokemon in pokemonList!.GetRange(0, pokemonList.Count / 2))
             {
-                var user = userContext.Users.FirstOrDefault(x => x.UserName.Equals("Diamond"));
+                var user = appContext.Trainers.FirstOrDefault(x => x.UserName.Equals("Diamond"));
 
-                userContext.Pokemon.Add(pokemon);
+                appContext.Pokemon.Add(pokemon);
                 user!.Pokemon!.Add(pokemon);
-                userContext.Users.Update(user);
+                appContext.Trainers.Update(user);
             }
 
-            userContext.SaveChanges();
+            appContext.SaveChanges();
 
-            pokemonRepository = new PokemonRepository(userContext);
-            userRepository = new UserRepository(userContext);
+            pokemonRepository = new PokemonRepository(appContext);
+            trainerRepository = new TrainerRepository(appContext);
 
-            userService = new UserServices(userRepository, pokemonRepository);
+            trainerService = new TrainerServices(trainerRepository, pokemonRepository);
             pokemonService = new PokemonServices(pokemonRepository);
         }
 
@@ -79,7 +74,7 @@ namespace msa_phase_3_backend.testing
         public void GetUserById_GetsCorrectUserName()
         {
             int userId = 1;
-            var result = userService.Get(userId);
+            var result = trainerService.Get(userId);
             result.Should().NotBeNull();
             result.UserName.Should().BeEquivalentTo("Bianca");
         }
@@ -87,7 +82,7 @@ namespace msa_phase_3_backend.testing
         public void GetUserByUserName_GetsCorrectUser()
         {
             string userName = "Skyla";
-            var result = userService.GetByUserName(userName);
+            var result = trainerService.GetByUserName(userName);
             result.Should().NotBeNull();
             result.UserName.Should().BeEquivalentTo("Skyla");
         }
@@ -95,25 +90,25 @@ namespace msa_phase_3_backend.testing
         public void GetUserByUserName_ShouldBeCaseSensitive()
         {
             string userName = "skyla";
-            var result = userService.GetByUserName(userName);
+            var result = trainerService.GetByUserName(userName);
             result.Should().BeNull();
         }
         [Test]
         public void GetNonExistentUser_ReturnsNull()
         {
             string userName = "Jack";
-            var result = userService.GetByUserName(userName);
+            var result = trainerService.GetByUserName(userName);
             result.Should().BeNull();
 
             int userId = 20;
-            var result_2 = userService.Get(userId);
+            var result_2 = trainerService.Get(userId);
             result_2.Should().BeNull();
         }
 
         [Test]
         public void GetAllUsers_GetsAllUsers()
         {
-            var result = userService.GetAll();
+            var result = trainerService.GetAll();
 
             result.Should().NotBeNull();
             result.Count().Should().Be(4);
@@ -123,11 +118,11 @@ namespace msa_phase_3_backend.testing
         public void DeleteById_RemovesUser()
         {
             var userId = 2;
-            userService.DeleteById(userId);
 
-            var result = userService.GetAll();
+            trainerService.DeleteById(userId);
 
-            result.Should().NotBeNull();
+            var result = trainerService.GetAll();
+
             result.Count().Should().Be(3);
             // Check that the user has been removed
             result.ToList().Select(x => x.Id).Should().NotContain(2);
@@ -136,10 +131,10 @@ namespace msa_phase_3_backend.testing
         [Test]
         public void InsertUser_AddsUser()
         {
-            var newUser = new User { UserName = "Jack" };
-            userService.Insert(newUser);
+            var newUser = new Trainer { UserName = "Jack" };
+            trainerService.Insert(newUser);
 
-            var result = userService.GetAll();
+            var result = trainerService.GetAll();
 
             result.Should().NotBeNull();
             result.Count().Should().Be(5);
@@ -150,12 +145,12 @@ namespace msa_phase_3_backend.testing
         public void UpdateUser_UpdatesUser()
         {
             int userId = 1;
-            var result = userService.Get(userId);
+            var result = trainerService.Get(userId);
 
             result.UserName = "Cheren";
-            userService.Update(result);
+            trainerService.Update(result);
 
-            var result_2 = userService.Get(userId);
+            var result_2 = trainerService.Get(userId);
 
             result_2.Should().NotBeNull();
             result_2.UserName.Should().BeEquivalentTo("Cheren");
@@ -164,24 +159,24 @@ namespace msa_phase_3_backend.testing
         [Test]
         public void DeletePokemonFromUser_DeletesPokemon()
         {
-            var originalCount = userContext.Pokemon.Count();
-            var pokemon = userContext.Pokemon.FirstOrDefault(p => p.Name!.ToLower().Equals("celebi"));
+            var originalCount = appContext.Pokemon.Count();
+            var pokemon = appContext.Pokemon.FirstOrDefault(p => p.Name!.ToLower().Equals("celebi"));
 
             pokemon.Should().NotBeNull();
 
             pokemonService.Delete(pokemon!);
 
-            userContext.Pokemon.Count().Should().Be(originalCount - 1);
-            userContext.Pokemon.Should().NotContain(pokemon!);
+            appContext.Pokemon.Count().Should().Be(originalCount - 1);
+            appContext.Pokemon.Should().NotContain(pokemon!);
         }
 
         [Test]
         public void AddPokemonToUser_AddsToUser()
         {
-            var originalCount = userContext.Pokemon.Count();
+            var originalCount = appContext.Pokemon.Count();
             var pokemon = pokemonList.First(p => p.Name!.Equals("Primarina"));
 
-            var user = userContext.Users.First(user => user.UserName!.Equals("Ralph"));
+            var user = appContext.Trainers.First(user => user.UserName!.Equals("Ralph"));
             var userPokemonCount = user.Pokemon!.Count;
 
             pokemon.Should().NotBeNull();
@@ -189,14 +184,14 @@ namespace msa_phase_3_backend.testing
             // Add Pokemon to database first
             pokemonService.Insert(pokemon);
             
-            userContext.Pokemon.Count().Should().Be(originalCount + 1);
-            userContext.Pokemon.Should().Contain(pokemon);
+            appContext.Pokemon.Count().Should().Be(originalCount + 1);
+            appContext.Pokemon.Should().Contain(pokemon);
             
             // Add Pokemon to user collection
             user.Pokemon!.Add(pokemon);
-            userService.Update(user);
+            trainerService.Update(user);
 
-            userContext.Users.First(user => user.UserName!.Equals("Ralph")).Pokemon!.Count.Should().Be(userPokemonCount + 1);
+            appContext.Trainers.First(user => user.UserName!.Equals("Ralph")).Pokemon!.Count.Should().Be(userPokemonCount + 1);
         }
     }
 }

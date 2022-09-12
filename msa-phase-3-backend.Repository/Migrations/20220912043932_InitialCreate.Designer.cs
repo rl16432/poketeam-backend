@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using msa_phase_3_backend.Repository.Data;
 
@@ -10,10 +11,11 @@ using msa_phase_3_backend.Repository.Data;
 
 namespace msa_phase_3_backend.Repository.Migrations
 {
-    [DbContext(typeof(UserContext))]
-    partial class UserContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20220912043932_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,17 +62,17 @@ namespace msa_phase_3_backend.Repository.Migrations
                     b.Property<int>("Speed")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int?>("TrainerId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("TrainerId");
 
                     b.ToTable("Pokemon");
                 });
 
-            modelBuilder.Entity("msa_phase_3_backend.Domain.Models.User", b =>
+            modelBuilder.Entity("msa_phase_3_backend.Domain.Models.Trainer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,17 +90,17 @@ namespace msa_phase_3_backend.Repository.Migrations
                     b.HasIndex("UserName")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Trainers");
                 });
 
             modelBuilder.Entity("msa_phase_3_backend.Domain.Models.Pokemon", b =>
                 {
-                    b.HasOne("msa_phase_3_backend.Domain.Models.User", null)
+                    b.HasOne("msa_phase_3_backend.Domain.Models.Trainer", null)
                         .WithMany("Pokemon")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("TrainerId");
                 });
 
-            modelBuilder.Entity("msa_phase_3_backend.Domain.Models.User", b =>
+            modelBuilder.Entity("msa_phase_3_backend.Domain.Models.Trainer", b =>
                 {
                     b.Navigation("Pokemon");
                 });

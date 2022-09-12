@@ -1,13 +1,13 @@
 ﻿using msa_phase_3_backend.Domain.Models;
 using msa_phase_3_backend.Services.ICustomServices;
-using msa_phase_3_backend.Repository.Repository;
+using msa_phase_3_backend.Repository.IRepository;
 
 namespace msa_phase_3_backend.Services.CustomServices
 {
     public class PokemonServices : ICustomService<Pokemon>
     {
-        private readonly PokemonRepository _pokemonRepository;
-        public PokemonServices(PokemonRepository pokemonRepository)
+        private readonly IRepository<Pokemon> _pokemonRepository;
+        public PokemonServices(IRepository<Pokemon> pokemonRepository)
         {
             _pokemonRepository = pokemonRepository;
         }

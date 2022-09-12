@@ -7,7 +7,7 @@ namespace msa_phase_3_backend.Repository.Repository
 {
     public class PokemonRepository : BaseRepository<Pokemon>
     {
-        public PokemonRepository(UserContext userContext) : base(userContext)
+        public PokemonRepository(ApplicationDbContext userContext) : base(userContext)
         {
         }
     }

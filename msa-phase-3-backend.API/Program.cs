@@ -6,6 +6,8 @@ using msa_phase_3_backend.Services;
 using msa_phase_3_backend.Services.CustomServices;
 using msa_phase_3_backend.Repository.Repository;
 using FluentValidation;
+using msa_phase_3_backend.Repository.IRepository;
+using msa_phase_3_backend.Services.ICustomServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,33 +25,33 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 //// Configure local SQL server database
-//builder.Services.AddDbContext<UserContext>(opt =>
+//builder.Services.AddDbContext<ApplicationDbContext>(opt =>
 //    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 //);
 
 if (builder.Configuration.GetConnectionString("DefaultConnection") == null)
 {
-    builder.Services.AddDbContext<UserContext>(opt =>
+    builder.Services.AddDbContext<ApplicationDbContext>(opt =>
         opt.UseInMemoryDatabase("PokeTeam")
     );
 }
 else
 {
     // Configure local/Azure SQL server database
-    builder.Services.AddDbContext<UserContext>(opt =>
+    builder.Services.AddDbContext<ApplicationDbContext>(opt =>
         opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
     );
 }
 
 // Add dependencies for repository and DB services
-builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<PokemonRepository>();
+builder.Services.AddScoped<IUserRepository<Trainer>, TrainerRepository>();
+builder.Services.AddScoped<IRepository<Pokemon>, PokemonRepository>();
 
-builder.Services.AddScoped<UserServices>();
-builder.Services.AddScoped<PokemonServices>();
+builder.Services.AddScoped<IUserCustomService<Trainer>, TrainerServices>();
+builder.Services.AddScoped<ICustomService<Pokemon>, PokemonServices>();
 
 // Add Fluent Validator
-builder.Services.AddScoped<IValidator<User>, UserValidator>();
+builder.Services.AddScoped<IValidator<Trainer>, TrainerValidator>();
 
 // Add CORS
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>

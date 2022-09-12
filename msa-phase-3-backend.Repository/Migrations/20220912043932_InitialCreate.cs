@@ -9,7 +9,7 @@ namespace msa_phase_3_backend.Repository.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "Trainers",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -18,7 +18,7 @@ namespace msa_phase_3_backend.Repository.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Trainers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -36,26 +36,26 @@ namespace msa_phase_3_backend.Repository.Migrations
                     SpecialDefense = table.Column<int>(type: "int", nullable: false),
                     Speed = table.Column<int>(type: "int", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true)
+                    TrainerId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Pokemon", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Pokemon_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
+                        name: "FK_Pokemon_Trainers_TrainerId",
+                        column: x => x.TrainerId,
+                        principalTable: "Trainers",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Pokemon_UserId",
+                name: "IX_Pokemon_TrainerId",
                 table: "Pokemon",
-                column: "UserId");
+                column: "TrainerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_UserName",
-                table: "Users",
+                name: "IX_Trainers_UserName",
+                table: "Trainers",
                 column: "UserName",
                 unique: true);
         }
@@ -66,7 +66,7 @@ namespace msa_phase_3_backend.Repository.Migrations
                 name: "Pokemon");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Trainers");
         }
     }
 }

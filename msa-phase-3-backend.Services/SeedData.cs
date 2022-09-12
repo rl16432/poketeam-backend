@@ -12,33 +12,33 @@ namespace msa_phase_3_backend.Services
         // Used to add users in the database on initialisation
         public static void Initialize(IServiceProvider serviceProvider)
         {
-            using (var context = new UserContext(
+            using (var context = new ApplicationDbContext(
                 serviceProvider.GetRequiredService<
-                    DbContextOptions<UserContext>>()))
+                    DbContextOptions<ApplicationDbContext>>()))
             {
                 // Look for any users
-                if (context.Users.Any())
+                if (context.Trainers.Any())
                 {
                     return; // DB has been seeded
                 }
 
-                context.Users.AddRange(
-                    new User
+                context.Trainers.AddRange(
+                    new Trainer
                     {
                         UserName = "Ash"
                     },
 
-                    new User
+                    new Trainer
                     {
                         UserName = "Misty"
                     },
 
-                    new User
+                    new Trainer
                     {
                         UserName = "Brock"
                     },
 
-                    new User
+                    new Trainer
                     {
                         UserName = "Cynthia"
                     }

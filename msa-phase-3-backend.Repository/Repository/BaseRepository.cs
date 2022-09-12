@@ -8,9 +8,9 @@ namespace msa_phase_3_backend.Repository.Repository
 {
     public abstract class BaseRepository<T> : IRepository<T> where T : BaseModel
     {
-        protected readonly UserContext _userContext;
+        protected readonly ApplicationDbContext _userContext;
         protected DbSet<T> entities;
-        public BaseRepository(UserContext userContext)
+        public BaseRepository(ApplicationDbContext userContext)
         {
             _userContext = userContext;
             entities = _userContext.Set<T>();
