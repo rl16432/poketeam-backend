@@ -35,7 +35,6 @@
   <ItemGroup>
     <ProjectReference Include="..\msa-phase-3-backend.API\msa-phase-3-backend.API.csproj" />
     <ProjectReference Include="..\msa-phase-3-backend.Domain\msa-phase-3-backend.Domain.csproj" />
-    <ProjectReference Include="..\msa-phase-3-backend.Services\msa-phase-3-backend.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

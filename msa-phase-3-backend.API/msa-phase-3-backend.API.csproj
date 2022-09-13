@@ -20,11 +20,13 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="6.0.8" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.66" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\msa-phase-3-backend.Services\msa-phase-3-backend.Services.csproj" />
+    <ProjectReference Include="..\msa-phase-3-backend.Repository\msa-phase-3-backend.Repository.csproj" />
   </ItemGroup>
 
   <ItemGroup>

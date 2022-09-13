@@ -7,7 +7,7 @@ namespace msa_phase_3_backend.Testing
 {
     internal class DbTestSetup
     {
-        public readonly List<string> UserNames = new List<string>() { "Bianca", "Ralph", "Skyla", "Diamond" };
+        public readonly List<string> UserNames = new() { "Bianca", "Ralph", "Skyla", "Diamond" };
         private readonly string userNameWithPokemon = "Diamond";
         public ApplicationDbContext AppContext { get; set; }
         public List<Pokemon> AddedPokemonList { get; set; }
@@ -31,7 +31,7 @@ namespace msa_phase_3_backend.Testing
 
             AppContext.SaveChanges();
 
-            NotAddedPokemonList = getPokemonListFromJson("pokemon_list.json");
+            NotAddedPokemonList = GetPokemonListFromJson("pokemon_list.json");
             AddedPokemonList = new List<Pokemon>();
 
             // User which we add Pokemon to for testing purposes
@@ -51,7 +51,7 @@ namespace msa_phase_3_backend.Testing
             AppContext.SaveChanges();
         }
 
-        public List<Pokemon> getPokemonListFromJson(string filePath)
+        public static List<Pokemon> GetPokemonListFromJson(string filePath)
         {
             // Read test Pokemon list from JSON
             StreamReader r = new(Path.Combine(TestContext.CurrentContext.WorkDirectory, "TestFiles", filePath));

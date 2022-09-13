@@ -8,7 +8,6 @@ using msa_phase_3_backend.API.Controllers;
 using msa_phase_3_backend.Domain.Models;
 using msa_phase_3_backend.Domain.Models.DTO;
 using msa_phase_3_backend.Repository.Repository;
-using msa_phase_3_backend.Services.CustomServices;
 using NSubstitute;
 using System.Net;
 using System.Text;
@@ -73,11 +72,8 @@ namespace msa_phase_3_backend.Testing
         public void Setup()
         {
             testSetup = new DbTestSetup(); 
-            var pokemonRepository = new PokemonRepository(testSetup.AppContext);
-            var userRepository = new TrainerRepository(testSetup.AppContext);
-
-            var trainerService = new TrainerServices(userRepository, pokemonRepository);
-            var pokemonService = new PokemonServices(pokemonRepository);
+            var pokemonService = new PokemonRepository(testSetup.AppContext);
+            var trainerService = new TrainerRepository(testSetup.AppContext);
 
             // Set up mock logger
             var mockLogger = LoggerFactory.Create(config =>
@@ -90,10 +86,10 @@ namespace msa_phase_3_backend.Testing
         }
 
         [Test]
-        public void GetUserByName_ReturnsOkObjectResult()
+        public async Task GetUserByName_ReturnsOkObjectResult()
         {
             string userName = testSetup.UserNames[1];
-            var result = controller.GetUser(userName);
+            var result = await controller.GetUser(userName);
 
             // Test that result is OkObjectResult
             result.Result.Should().BeAssignableTo<OkObjectResult>();
@@ -101,16 +97,16 @@ namespace msa_phase_3_backend.Testing
 
         // Test that OkObjectResult is returned by UserController.GetUsers()
         [Test]
-        public void GetAllUsers_ReturnsOkObjectResult()
+        public async Task GetAllUsers_ReturnsOkObjectResult()
         {
-            var result = controller.GetUsers();
+            var result = await controller.GetUsers();
             result.Result.Should().BeAssignableTo<OkObjectResult>();
         }
 
         [Test]
-        public void GetAllUsers_ReturnsAllUsers()
+        public async Task GetAllUsers_ReturnsAllUsers()
         {
-            var result = controller.GetUsers();
+            var result = await controller.GetUsers();
 
             var typedResult = result.Result as OkObjectResult;
             var typedValue = typedResult!.Value as IEnumerable<Trainer>;
@@ -229,7 +225,7 @@ namespace msa_phase_3_backend.Testing
 
             // Read Pokemon from JSON
 
-            var pokemonList = testSetup.getPokemonListFromJson("pokemon_list.json");
+            var pokemonList = DbTestSetup.GetPokemonListFromJson("pokemon_list.json");
             // Add 6 Pokemon to the user with ID: 1
             foreach (Pokemon pokemon in pokemonList.GetRange(0, 6))
             {
@@ -251,9 +247,9 @@ namespace msa_phase_3_backend.Testing
         }
 
         [Test]
-        public void DeletePokemonFromUser_ReturnsOkResult()
+        public async Task DeletePokemonFromUser_ReturnsOkResult()
         {
-            var result = controller.DeletePokemonFromUser(testSetup.UserWithPokemon.Id, testSetup.AddedPokemonList[0].Name);
+            var result = await controller.DeletePokemonFromUser(testSetup.UserWithPokemon.Id, testSetup.AddedPokemonList[0].Name);
 
             result.Should().BeAssignableTo<OkResult>();
         }
@@ -271,9 +267,9 @@ namespace msa_phase_3_backend.Testing
         }
 
         [Test]
-        public void DeletePokemonFromInvalidUser_ReturnsNotFoundResult()
+        public async Task DeletePokemonFromInvalidUser_ReturnsNotFoundResult()
         {
-            var result = controller.DeletePokemonFromUser(20, testSetup.AddedPokemonList[0].Name);
+            var result = await controller.DeletePokemonFromUser(20, testSetup.AddedPokemonList[0].Name);
 
             result.Should().BeAssignableTo<NotFoundObjectResult>();
         }

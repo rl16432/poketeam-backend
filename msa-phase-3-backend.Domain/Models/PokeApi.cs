@@ -10,27 +10,32 @@ namespace msa_phase_3_backend.Domain.Models
         public int PokemonId { get; set; }
         [JsonPropertyName("name")]
         [Required]
-        public string? Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         [JsonPropertyName("stats")]
         [Required]
-        public ICollection<StatsApi>? Stats { get; set; }
+        public ICollection<StatsApi> Stats { get; set; } = new List<StatsApi>();
     }
 
     public class StatsApi
     {
         [JsonPropertyName("base_stat")]
+        [Required]
         public int BaseStat { get; set; }
         [JsonPropertyName("effort")]
+        [Required]
         public long Effort { get; set; }
         [JsonPropertyName("stat")]
-        public StatApi? Stat { get; set; }
+        [Required]
+        public StatApi Stat { get; set; } = new StatApi();
     }
 
     public class StatApi
     {
         [JsonPropertyName("name")]
-        public string? Name { get; set; }
+        [Required]
+        public string Name { get; set; } = string.Empty;
         [JsonPropertyName("url")]
-        public string? Url { get; set; }
+        [Required]
+        public string Url { get; set; } = string.Empty;
     }
 }

@@ -8,5 +8,11 @@
         void Update(T entity);
         void Delete(T entity);
         void SaveChanges();
+
+        Task<IEnumerable<T>> GetAllAsync();
+        Task<T> GetAsync(int Id);
+        Task InsertAsync(T entity);
+        Task UpdateAsync(T entity);
+        Task DeleteAsync(T entity);
     }
 }

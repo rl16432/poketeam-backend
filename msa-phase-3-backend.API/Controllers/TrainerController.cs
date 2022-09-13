@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using msa_phase_3_backend.Domain.Models;
 using msa_phase_3_backend.Domain.Models.DTO;
-using msa_phase_3_backend.Services.ICustomServices;
+using msa_phase_3_backend.Repository.IRepository;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -17,11 +17,11 @@ public class TrainerController : ControllerBase
     private readonly ILogger<TrainerController> _logger;
     private readonly IConfiguration _configuration;
     private readonly IValidator<Trainer> _trainerValidator;
-    private readonly ICustomService<Pokemon> _pokemonService;
-    private readonly IUserCustomService<Trainer> _trainerService;
+    private readonly IRepository<Pokemon> _pokemonService;
+    private readonly IUserRepository<Trainer> _trainerService;
 
     public TrainerController(ILogger<TrainerController> logger, IHttpClientFactory clientFactory, IConfiguration configuration,
-        IUserCustomService<Trainer> userService, ICustomService<Pokemon> pokemonService, IValidator<Trainer> userValidator)
+        IUserRepository<Trainer> userService, IRepository<Pokemon> pokemonService, IValidator<Trainer> userValidator)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -41,9 +41,9 @@ public class TrainerController : ControllerBase
     /// </summary>
     /// <returns>A response with the list of users</returns>
     [HttpGet]
-    public ActionResult<IEnumerable<Trainer>> GetUsers()
+    public async Task<ActionResult<IEnumerable<Trainer>>> GetUsers()
     {
-        var users = _trainerService.GetAll();
+        var users = await _trainerService.GetAllAsync();
         return Ok(users);
     }
 
@@ -53,9 +53,9 @@ public class TrainerController : ControllerBase
     /// <param name="userName">The user name of the user to return</param>
     /// <returns>The user with that user name, or a 404 response if the user does not exist</returns>
     [HttpGet("{userName}")]
-    public ActionResult<Trainer> GetUser(string userName)
+    public async Task<ActionResult<Trainer>> GetUser(string userName)
     {
-        var user = _trainerService.GetByUserName(userName);
+        var user = await _trainerService.GetByUserNameAsync(userName);
 
         if (user == null)
         {
@@ -87,7 +87,7 @@ public class TrainerController : ControllerBase
         {
             return BadRequest(result.Errors.Select(err => err.ErrorMessage));
         }
-        _trainerService.Insert(user);
+        await _trainerService.InsertAsync(user);
 
         return CreatedAtAction(nameof(PostUser), new { userId = user.Id, userName = user.UserName }, user);
     }
@@ -98,9 +98,13 @@ public class TrainerController : ControllerBase
     /// <param name="userId">The userId of the user to delete</param>
     /// <returns>A 200 OK response</returns>
     [HttpDelete("{userId}")]
-    public IActionResult DeleteUser(int userId)
+    public async Task<IActionResult> DeleteUser(int userId)
     {
-        _trainerService.DeleteById(userId);
+        var user = await _trainerService.GetAsync(userId); 
+        if (user != null)
+        {
+            await _trainerService.DeleteAsync(user);
+        }
 
         return Ok();
     }
@@ -115,8 +119,16 @@ public class TrainerController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<ActionResult<Trainer>> AddPokemonToUser(int userId, [Required] string pokemon)
     {
+        // Call on PokeApi
+        var res = await _client.GetAsync($"/api/v2/pokemon/{pokemon.ToLower()}");
+
+        if (!res.IsSuccessStatusCode)
+        {
+            return NotFound("No Pokemon found");
+        }
+
         // Find user by ID
-        var user = _trainerService.Get(userId);
+        var user = await _trainerService.GetAsync(userId);
 
         if (user == null)
         {
@@ -126,15 +138,7 @@ public class TrainerController : ControllerBase
         if (user.Pokemon.Count >= 6)
         {
             return BadRequest("Trainer already has 6 Pokemon");
-        }
-
-        // Call on PokeApi
-        var res = await _client.GetAsync($"/api/v2/pokemon/{pokemon.ToLower()}");
-
-        if (!res.IsSuccessStatusCode)
-        {
-            return NotFound("No Pokemon found");
-        }
+        }        
 
         var content = await res.Content.ReadAsStringAsync();
         // Convert JSON response to PokeApi schema object
@@ -150,13 +154,13 @@ public class TrainerController : ControllerBase
         var newPokemon = new Pokemon
         {
             PokemonNo = jsonContent!.PokemonId,
-            Name = Regex.Replace(jsonContent!.Name!, @"(^\w)|(\s\w)", m => m.Value.ToUpper()),
-            Attack = jsonContent!.Stats!.FirstOrDefault(s => s!.Stat!.Name!.Equals("attack"))!.BaseStat,
-            Defense = jsonContent!.Stats!.FirstOrDefault(s => s!.Stat!.Name!.Equals("defense"))!.BaseStat,
-            Hp = jsonContent!.Stats!.FirstOrDefault(s => s!.Stat!.Name!.Equals("hp"))!.BaseStat,
-            SpecialAttack = jsonContent!.Stats!.FirstOrDefault(s => s!.Stat!.Name!.Equals("special-attack"))!.BaseStat,
-            SpecialDefense = jsonContent!.Stats!.FirstOrDefault(s => s!.Stat!.Name!.Equals("special-defense"))!.BaseStat,
-            Speed = jsonContent!.Stats!.FirstOrDefault(s => s!.Stat!.Name!.Equals("speed"))!.BaseStat
+            Name = Regex.Replace(jsonContent.Name, @"(^\w)|(\s\w)", m => m.Value.ToUpper()),
+            Attack = jsonContent.Stats.FirstOrDefault(s => s.Stat.Name.Equals("attack"))!.BaseStat,
+            Defense = jsonContent.Stats.FirstOrDefault(s => s.Stat.Name.Equals("defense"))!.BaseStat,
+            Hp = jsonContent.Stats.FirstOrDefault(s => s.Stat.Name.Equals("hp"))!.BaseStat,
+            SpecialAttack = jsonContent.Stats.FirstOrDefault(s => s.Stat.Name.Equals("special-attack"))!.BaseStat,
+            SpecialDefense = jsonContent.Stats.FirstOrDefault(s => s.Stat.Name.Equals("special-defense"))!.BaseStat,
+            Speed = jsonContent.Stats.FirstOrDefault(s => s.Stat.Name.Equals("speed"))!.BaseStat
         };
 
         newPokemon.Image = $"{_configuration["PokemonArtworkAddress"]}/{newPokemon.PokemonNo}.png";
@@ -173,7 +177,7 @@ public class TrainerController : ControllerBase
         // Link new Pokemon to user
         user.Pokemon.Add(newPokemon);
 
-        _trainerService.Update(user);
+        await _trainerService.UpdateAsync(user);
 
         return NoContent();
     }
@@ -185,7 +189,7 @@ public class TrainerController : ControllerBase
     /// <param name="pokemon">The name of the Pokemon to delete</param>
     /// <returns>A 200 OK Response</returns>
     [HttpDelete("{userId}/Pokemon")]
-    public IActionResult DeletePokemonFromUser(int userId, [Required] string pokemon)
+    public async Task<IActionResult> DeletePokemonFromUser(int userId, [Required] string pokemon)
     {
         // Find user by ID
         var user = _trainerService.Get(userId);
@@ -206,7 +210,8 @@ public class TrainerController : ControllerBase
             {
                 user.Pokemon!.Remove(pokemonObj);
                 _pokemonService.Delete(pokemonObj);
-                _trainerService.Update(user);
+
+                await _trainerService.UpdateAsync(user);
             }
         }
         return Ok();

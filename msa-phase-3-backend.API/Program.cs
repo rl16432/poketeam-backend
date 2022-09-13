@@ -1,12 +1,11 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using msa_phase_3_backend.Domain.Models;
+using msa_phase_3_backend.Repository;
+using msa_phase_3_backend.Repository.Caching;
 using msa_phase_3_backend.Repository.Data;
 using msa_phase_3_backend.Repository.IRepository;
 using msa_phase_3_backend.Repository.Repository;
-using msa_phase_3_backend.Services;
-using msa_phase_3_backend.Services.CustomServices;
-using msa_phase_3_backend.Services.ICustomServices;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +30,7 @@ builder.Services.AddSwaggerGen(options =>
 
 if (builder.Configuration.GetConnectionString("DefaultConnection") == null)
 {
+    // Use in memory database if no connection string
     builder.Services.AddDbContext<ApplicationDbContext>(opt =>
         opt.UseInMemoryDatabase("PokeTeam")
     );
@@ -41,14 +41,22 @@ else
     builder.Services.AddDbContext<ApplicationDbContext>(opt =>
         opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
     );
+    
+}
+
+// Use cache if provided in app settings
+if (builder.Configuration["RedisCacheUrl"] != null)
+{
+    builder.Services.AddTransient<ICacheService, RedisCacheService>();
+    builder.Services.AddStackExchangeRedisCache(opt =>
+    {
+        opt.Configuration = builder.Configuration["RedisCacheUrl"];
+    });
 }
 
 // Add dependencies for repository and DB services
 builder.Services.AddScoped<IUserRepository<Trainer>, TrainerRepository>();
 builder.Services.AddScoped<IRepository<Pokemon>, PokemonRepository>();
-
-builder.Services.AddScoped<IUserCustomService<Trainer>, TrainerServices>();
-builder.Services.AddScoped<ICustomService<Pokemon>, PokemonServices>();
 
 // Add Fluent Validator
 builder.Services.AddScoped<IValidator<Trainer>, TrainerValidator>();
