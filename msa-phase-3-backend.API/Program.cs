@@ -45,12 +45,12 @@ else
 }
 
 // Use cache if provided in app settings
-if (builder.Configuration["RedisCacheUrl"] != null)
+if (builder.Configuration["CacheConnection"] != null)
 {
     builder.Services.AddTransient<ICacheService, RedisCacheService>();
     builder.Services.AddStackExchangeRedisCache(opt =>
     {
-        opt.Configuration = builder.Configuration["RedisCacheUrl"];
+        opt.Configuration = builder.Configuration["CacheConnection"];
     });
 }
 
@@ -71,6 +71,10 @@ builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 builder.Services.AddHttpClient(builder.Configuration["PokeapiClientName"] ?? "pokeapi", configureClient: client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["PokeapiAddress"] ?? "https://pokeapi.co/api/v2");
+});
+builder.Services.AddDistributedRedisCache(option =>
+{
+    option.Configuration = builder.Configuration["CacheConnection"];
 });
 
 var app = builder.Build();

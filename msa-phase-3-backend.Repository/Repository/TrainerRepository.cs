@@ -50,7 +50,7 @@ namespace msa_phase_3_backend.Repository.Repository
             IEnumerable<Trainer>? cachedData = _cacheService.TryGet<IEnumerable<Trainer>>(cacheKey);
             if (cachedData == null)
             {
-                cachedData = await _appContext.Set<Trainer>().ToListAsync();
+                cachedData = await _appContext.Set<Trainer>().IncludeMultiple(user => user.Pokemon).ToListAsync();
                 _cacheService.Set(cacheKey, cachedData);
             }
             return cachedData;
