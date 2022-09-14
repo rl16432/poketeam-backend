@@ -5,12 +5,6 @@
       "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/poketeam/databases/application",
       "type": "mssql.azure",
       "connectionId": "ConnectionStrings:DefaultConnection"
-    },
-    "redis1": {
-      "secretStore": "AzureAppSettings",
-      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Cache/Redis/poketeam",
-      "type": "redis.azure",
-      "connectionId": "CacheConnection"
     }
   }
 }

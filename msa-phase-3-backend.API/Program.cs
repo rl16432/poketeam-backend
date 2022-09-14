@@ -44,15 +44,17 @@ else
     
 }
 
-// Use cache if provided in app settings
-if (builder.Configuration["CacheConnection"] != null)
-{
-    builder.Services.AddTransient<ICacheService, RedisCacheService>();
-    builder.Services.AddStackExchangeRedisCache(opt =>
-    {
-        opt.Configuration = builder.Configuration["CacheConnection"];
-    });
-}
+//// Use cache if provided in app settings
+//if (builder.Configuration["CacheConnection"] != null)
+//{
+//    builder.Services.AddTransient<ICacheService, RedisCacheService>();
+//    builder.Services.AddStackExchangeRedisCache(opt =>
+//    {
+//        opt.Configuration = builder.Configuration["CacheConnection"];
+//    });
+//}
+
+builder.Services.AddMemoryCache();
 
 // Add dependencies for repository and DB services
 builder.Services.AddScoped<IUserRepository<Trainer>, TrainerRepository>();

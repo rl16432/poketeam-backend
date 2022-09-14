@@ -55,5 +55,17 @@ namespace msa_phase_3_backend.Repository.Repository
             }
             return cachedData;
         }
+
+        public override async Task RefreshCache()
+        {
+            if (_cacheService == null)
+            {
+                return;
+            }
+            _cacheService.Remove(cacheKey);
+            var cachedList = await _appContext.Set<Trainer>().IncludeMultiple(u => u.Pokemon)
+                .ToListAsync();
+            _cacheService.Set(cacheKey, cachedList);
+        }
     }
 }

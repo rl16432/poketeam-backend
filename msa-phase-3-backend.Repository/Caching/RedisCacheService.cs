@@ -8,6 +8,7 @@ namespace msa_phase_3_backend.Repository.Caching
     {
         private readonly int AbsoluteExpirationInHours = 1;
         private readonly int SlidingExpirationInMinutes = 30;
+
         private readonly IDistributedCache _distributedCache;
         private readonly DistributedCacheEntryOptions _cacheOptions;
         public RedisCacheService(IDistributedCache distributedCache)

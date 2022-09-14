@@ -124,7 +124,7 @@ namespace msa_phase_3_backend.Repository.Repository
             await RefreshCache();
         }
 
-        public async Task RefreshCache()
+        public virtual async Task RefreshCache()
         {
             if (_cacheService == null)
             {
