@@ -5,15 +5,25 @@ This API performs CRUD operations to create, read, update and delete users, whil
 ## PokeApi
 https://pokeapi.co
 
+## Getting started
+
+1. Open solution in Visual Studio
+2. Remove "DefaultConnection" connection string in appsettings.json to use in memory database
+
+   ![image](https://user-images.githubusercontent.com/65014987/192089188-da37534e-ca1a-4752-9d06-f44e6a13d473.png)
+3. Start API
+   
+   ![image](https://user-images.githubusercontent.com/65014987/192089158-929e52af-0c34-4bac-8762-b83473c2fd62.png)
+
+
 ## Onion Architecture
 
-Onion architecture was utilised in this project with domain, repository, services and presentation layers which are increasingly further from the domain, and closer to the 'presentation'. This architecture allows for separation of concerns, with different layers performing different functions closer or further from the domain. 
+Onion architecture was utilised in this project with domain, repository, and presentation layers which are increasingly further from the domain, and closer to the 'presentation'. This architecture allows for separation of concerns, with different layers performing different functions closer or further from the domain. 
 
-![image](https://user-images.githubusercontent.com/65014987/189576074-c3a9fd25-e5f5-453e-909e-6ede48f55338.png)
+![image](https://user-images.githubusercontent.com/65014987/192089213-825eaaa7-9490-4910-9501-144fdf164e5f.png)
 
 - The domain layer consists of the database models as well as the model defining the response from PokeAPI.
 - The repository layer defines classes which interact with the database. This includes database migrations, database contexts and read/write operations
-- The services layer contains the logic used by the controller and references operations defined in the repository layer
 - The presentation layer contains the controller and uses the logic defined in services to present data to the user through an API
 
 ## Entity Framework Core
@@ -45,6 +55,24 @@ All test cases performed in this application utilise **FluentAssertion**.
 **FluentValidation** is also used to provide validation rules for the Trainer model. The username has to be between 3 and 20 characters, and the number of Pokemon for each trainer is capped at 6.
 
 ![image](https://user-images.githubusercontent.com/65014987/189623651-d7632750-2e7b-40de-84cf-1daa4ef1819a.png)
+
+## Caching
+
+Caching was used to store the result from the 'GetAll' query and access it without having to query again. 
+The approach involved defining an ICacheService interface which defines the operations performed on the cache. Two different implementations of the interface were created, one for Redis and one using in-memory cache.
+The repository implements the cache flow in the operations. 
+
+![image](https://user-images.githubusercontent.com/65014987/192089444-aa873d6a-15c9-41e0-adce-fc78befc8b0b.png)
+
+*Defined async operations in repository which gets cached value if exists and sets cached value if not*
+
+Performance:
+- No cache: GET all: ~420ms
+- In memory cache: GET all: ~420ms
+- Redis cache: GET all: ~500ms
+
+The negligible difference in the response time, suggest that the response is limited predominantly by the server response time rather than the query.
+
 
 
 
