@@ -1,30 +1,30 @@
-name: Build and deploy .NET Core application to Web App msa-phase-3-backendAPI20220910020650 with API Management Service poketeam-api-poketeam-api
+name: Build and deploy .NET Core application to Web App poketeam-backendAPI20220910020650 with API Management Service poketeam-api-poketeam-api
 on:
   push:
     branches:
     - main
 env:
-  AZURE_WEBAPP_NAME: msa-phase-3-backendAPI20220910020650
-  AZURE_WEBAPP_PACKAGE_PATH: msa-phase-3-backend.API\publish
+  AZURE_WEBAPP_NAME: poketeam-backendAPI20220910020650
+  AZURE_WEBAPP_PACKAGE_PATH: poketeam-backend.API\publish
   AZURE_APIM_RESOURCE_PATH: /v1
-  AZURE_APIM_RESOURCEGROUP: msa-phase-3
+  AZURE_APIM_RESOURCEGROUP: poketeam
   AZURE_APIM_SERVICENAME: poketeam-api
   AZURE_APIM_API_ID: poketeam-api
-  AZURE_APIM_APPSERVICEURL: https://msa-phase-3-backendapi20220910020650.azurewebsites.net
+  AZURE_APIM_APPSERVICEURL: https://poketeam-backendapi20220910020650.azurewebsites.net
   SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION: 6.4.0
   SWASHBUCKLE_DOTNET_CORE_VERSION: 6.0.x
-  API_IMPORT_SPECIFICATION_PATH: msa-phase-3-backend.API\publish\swagger.json
-  API_IMPORT_DLL: msa-phase-3-backend.API\bin\Release\net6.0\msa-phase-3-backend.API.dll
+  API_IMPORT_SPECIFICATION_PATH: poketeam-backend.API\publish\swagger.json
+  API_IMPORT_DLL: poketeam-backend.API\bin\Release\net6.0\poketeam-backend.API.dll
   API_IMPORT_VERSION: v1
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 6.0.x
-  WORKING_DIRECTORY: msa-phase-3-backend.API
+  WORKING_DIRECTORY: poketeam-backend.API
 jobs:
   build:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Setup .NET Cores
+    - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
