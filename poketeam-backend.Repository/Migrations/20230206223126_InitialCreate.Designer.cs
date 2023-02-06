@@ -12,7 +12,7 @@ using poketeam_backend.Repository.Data;
 namespace poketeam_backend.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220912043932_InitialCreate")]
+    [Migration("20230206223126_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,7 +24,7 @@ namespace poketeam_backend.Repository.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("msa_phase_3_backend.Domain.Models.Pokemon", b =>
+            modelBuilder.Entity("poketeam_backend.Domain.Models.Pokemon", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -72,7 +72,7 @@ namespace poketeam_backend.Repository.Migrations
                     b.ToTable("Pokemon");
                 });
 
-            modelBuilder.Entity("msa_phase_3_backend.Domain.Models.Trainer", b =>
+            modelBuilder.Entity("poketeam_backend.Domain.Models.Trainer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -93,14 +93,14 @@ namespace poketeam_backend.Repository.Migrations
                     b.ToTable("Trainers");
                 });
 
-            modelBuilder.Entity("msa_phase_3_backend.Domain.Models.Pokemon", b =>
+            modelBuilder.Entity("poketeam_backend.Domain.Models.Pokemon", b =>
                 {
-                    b.HasOne("msa_phase_3_backend.Domain.Models.Trainer", null)
+                    b.HasOne("poketeam_backend.Domain.Models.Trainer", null)
                         .WithMany("Pokemon")
                         .HasForeignKey("TrainerId");
                 });
 
-            modelBuilder.Entity("msa_phase_3_backend.Domain.Models.Trainer", b =>
+            modelBuilder.Entity("poketeam_backend.Domain.Models.Trainer", b =>
                 {
                     b.Navigation("Pokemon");
                 });
