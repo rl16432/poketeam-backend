@@ -2,6 +2,9 @@
 
 This API performs CRUD operations to create, read, update and delete users, while integrating with PokeApi to *add* and *delete* Pokemon from a user's team
 
+## Front-end Repo
+https://github.com/rl16432/poketeam-frontend
+
 ## Contents
 
 - [Getting started](#getting-started)
